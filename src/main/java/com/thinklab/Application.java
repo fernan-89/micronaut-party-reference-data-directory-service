@@ -1,5 +1,6 @@
 package com.thinklab;
 
+<<<<<<< HEAD
 import com.mongodb.reactivestreams.client.MongoClient;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.context.event.StartupEvent;
@@ -66,5 +67,13 @@ public class Application {
                 System.exit(1);
             }
         }
+=======
+import io.micronaut.runtime.Micronaut;
+
+public class Application {
+
+    public static void main(String[] args) {
+        Micronaut.run(Application.class, args);
+>>>>>>> 0fcdcb55c5340a3eba39b102c8d27c5dd0c7c9b0
     }
 }
