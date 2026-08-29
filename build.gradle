@@ -1,7 +1,6 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.micronaut.application") version "4.4.2"
-    id("io.micronaut.aot") version "4.4.2"
+    id "io.micronaut.application" version "4.4.2"
+    id "io.micronaut.aot" version "4.4.2"
 }
 
 version = "0.1.0-SNAPSHOT"
@@ -13,42 +12,47 @@ repositories {
 
 dependencies {
     // Micronaut Core & AOT
-    annotationProcessor("io.micronaut:micronaut-http-validation")
-    annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut.serde:micronaut-serde-jackson")
+    annotationProcessor "io.micronaut.serde:micronaut-serde-processor"
+    annotationProcessor "io.micronaut.validation:micronaut-validation-processor"
+
+    implementation "io.micronaut:micronaut-http-client"
+    implementation "io.micronaut:micronaut-jackson-databind"
+    implementation "io.micronaut.serde:micronaut-serde-jackson"
+
+    // YAML Parser required by Micronaut AOT (convertYamlToJava)
+    runtimeOnly "org.yaml:snakeyaml"
 
     // Reactive Streams & Orchestration
-    implementation("io.projectreactor:reactor-core")
+    implementation "io.projectreactor:reactor-core"
 
     // Persistence: Reactive MongoDB
-    implementation("io.micronaut.mongodb:micronaut-mongo-reactive")
-    implementation("org.mongodb:mongodb-driver-reactivestreams")
+    implementation "io.micronaut.mongodb:micronaut-mongo-reactive"
+    implementation "org.mongodb:mongodb-driver-reactivestreams"
+    implementation "io.micronaut.mongodb:micronaut-mongo-reactive"
 
     // SRE & Observability: OpenTelemetry & Validation
-    implementation("io.micronaut.validation:micronaut-validation")
-    implementation("io.micronaut.tracing:micronaut-tracing-opentelemetry-http")
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation "io.micronaut.validation:micronaut-validation"
+    implementation "io.micronaut.tracing:micronaut-tracing-opentelemetry-http"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp"
 
-    // Validation
-    implementation("jakarta.validation:jakarta.validation-api")
+    // Explicit API to prevent NoClassDefFoundError at runtime
+    implementation "jakarta.validation:jakarta.validation-api"
 
     // Logging
-    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly "ch.qos.logback:logback-classic"
 
-    // Testing Layer: JUnit 5, Mockito & Testcontainers
-    testImplementation("io.micronaut.test:micronaut-test-junit5")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-    testImplementation("org.mockito:mockito-core")
-    testImplementation("org.mockito:mockito-junit-jupiter")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:mongodb")
+    // Testing Layer
+    testImplementation "io.micronaut.test:micronaut-test-junit5"
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.mockito:mockito-core"
+    testImplementation "org.mockito:mockito-junit-jupiter"
+    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation "org.testcontainers:mongodb"
 }
 
 application {
-    mainClass.set("com.thinklab.companyservice.Application")
+    mainClass = "com.thinklab.Application"
 }
 
 java {
@@ -58,14 +62,14 @@ java {
 
 graalvmNative.toolchainDetection = false
 micronaut {
-    runtime("netty")
-    testRuntime("junit5")
+    version "4.4.2"
+    runtime "netty"
+    testRuntime "junit5"
     processing {
-        incremental(true)
-        annotations("com.thinklab.companyservice.*")
+        incremental true
+        annotations "com.thinklab.*"
     }
     aot {
-        // Ahead of Time Compilation Optimizations
         optimizeServiceLoading = true
         convertYamlToJava = true
         precomputeOperations = true

@@ -1,0 +1,119 @@
+{
+  "info": {
+    "name": "Thinklab Enterprise - Company Service",
+    "description": "Automated test suite for Company Service enforcing SRE constraints and RFC 7807.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create Company (Happy Path)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response contains Sovereign ID (UUID v4)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.be.a('string');",
+              "    pm.expect(jsonData.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);",
+              "});",
+              "",
+              "pm.test(\"Trace Context is present in response headers\", function () {",
+              "    // Verifies W3C traceparent propagation from OpenTelemetry",
+              "    pm.expect(pm.response.headers.has('traceparent')).to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/companies",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "companies"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"corporateName\": \"Thinklab Global Inc.\",\n  \"tradeName\": \"Thinklab\",\n  \"taxIdentifier\": \"12345678901234\",\n  \"billing\": {\n    \"billingEmail\": \"billing@thinklab.com\",\n    \"currency\": \"USD\",\n    \"taxRegime\": \"STANDARD\"\n  }\n}"
+        }
+      }
+    },
+    {
+      "name": "2. Create Company (RFC 7807 Validation Failure)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"Content-Type is application/problem+json\", function () {",
+              "    pm.response.to.have.header('Content-Type', 'application/problem+json');",
+              "});",
+              "",
+              "pm.test(\"Validates RFC 7807 problem details structure\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.type).to.include(\"validation-error\");",
+              "    pm.expect(jsonData.title).to.eql(\"Bad Request - Validation Failed\");",
+              "    pm.expect(jsonData.status).to.eql(400);",
+              "    pm.expect(jsonData.instance).to.include(\"/api/v1/companies\");",
+              "    pm.expect(jsonData.violations).to.be.an('array').that.is.not.empty;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/companies",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "companies"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"corporateName\": \"\",\n  \"tradeName\": \"Thinklab\",\n  \"taxIdentifier\": \"INVALID_TAX_ID\",\n  \"billing\": {\n    \"billingEmail\": \"not-an-email\",\n    \"currency\": \"US\",\n    \"taxRegime\": \"STANDARD\"\n  }\n}"
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    }
+  ]
+}
