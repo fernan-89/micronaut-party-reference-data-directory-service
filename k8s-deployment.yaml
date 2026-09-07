@@ -1,0 +1,113 @@
+# ==============================================================================================
+# /**
+#  * @file        k8s-deployment.yaml
+#  * @module      Kubernetes Workload Manifest
+#  * @description High-availability Deployment and ClusterIP Service for the Company Service.
+#  *              Implements strict SecurityContexts, graceful termination, and native HTTP
+#  *              probes tailored for Distroless containers (no shell dependencies).
+#  */
+# ==============================================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thinklab-company-service
+  namespace: business-mesh
+  labels:
+    app: company-service
+    tier: backend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: company-service
+  template:
+    metadata:
+      labels:
+        app: company-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/prometheus"
+    spec:
+      terminationGracePeriodSeconds: 30
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532 # Matches 'nonroot' UID from the Distroless image
+        runAsGroup: 65532
+        fsGroup: 65532
+
+      containers:
+        - name: company-service
+          image: thinklab.azurecr.io/company-service:latest
+          imagePullPolicy: Always
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-credentials
+                  key: connection-string
+            - name: HASH_SERVICE_URL
+              value: "http://hash-service-clusterip.security-mesh.svc.cluster.local"
+            - name: MICRONAUT_ENVIRONMENTS
+              value: "k8s,prod"
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: company-service-clusterip
+  namespace: business-mesh
+  labels:
+    app: company-service
+spec:
+  type: ClusterIP
+  selector:
+    app: company-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP

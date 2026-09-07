@@ -7,18 +7,20 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.server.exceptions.ExceptionHandler;
 import io.micronaut.serde.annotation.Serdeable;
 import jakarta.inject.Singleton;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 /**
  * Global Exception Handler enforcing the RFC 7807 (Problem Details) standard.
- * Uses name-based inspection to completely eliminate strict bytecode classloader coupling
- * with optional validation modules, ensuring high availability and zero ClassNotFound exceptions.
+ * Differentiates structurally between Business Logic Failures, Not Found, and Infrastructure/System Failures.
+ * Critical component for SRE Observability and API Contracts.
  */
 @Singleton
 @Requires(classes = {Throwable.class, ExceptionHandler.class})
@@ -29,25 +31,13 @@ public class GlobalExceptionHandler implements ExceptionHandler<Throwable, HttpR
 
     @Override
     public HttpResponse<Rfc7807Problem> handle(HttpRequest request, Throwable exception) {
-        String exceptionClassName = exception.getClass().getName();
 
-        // 1. Business Validation Failures (Name-based resolution to prevent classloader loading issues)
-        if (exceptionClassName.contains("ConstraintViolationException")) {
+        // 1. Business Validation Failures
+        if (exception instanceof ConstraintViolationException constraintException) {
             log.warn("[BUSINESS FAILURE] Validation error on endpoint {}", request.getPath());
-
-            List<String> violations;
-            try {
-                // Reflection fallback to extract constraint messages safely if present
-                var violationsMethod = exception.getClass().getMethod("getConstraintViolations");
-                var rawViolations = (Iterable<?>) violationsMethod.invoke(exception);
-                java.util.List<String> extracted = new java.util.ArrayList<>();
-                for (Object v : rawViolations) {
-                    extracted.add(v.toString());
-                }
-                violations = extracted;
-            } catch (Exception e) {
-                violations = Collections.singletonList(exception.getMessage());
-            }
+            List<String> violations = constraintException.getConstraintViolations().stream()
+                    .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                    .collect(Collectors.toList());
 
             Rfc7807Problem problem = new Rfc7807Problem(
                     URI.create("https://thinklab.com/probs/validation-error"),
@@ -61,7 +51,22 @@ public class GlobalExceptionHandler implements ExceptionHandler<Throwable, HttpR
             return HttpResponse.badRequest(problem).contentType(PROBLEM_CONTENT_TYPE);
         }
 
-        // 2. Business Domain Failures (Illegal Arguments or State Mutations)
+        // 2. Resource Not Found Failures
+        if (exception instanceof NoSuchElementException notFoundException) {
+            log.warn("[NOT FOUND] Resource not found on endpoint {}: {}", request.getPath(), notFoundException.getMessage());
+            Rfc7807Problem problem = new Rfc7807Problem(
+                    URI.create("https://thinklab.com/probs/not-found"),
+                    "Not Found",
+                    HttpStatus.NOT_FOUND.getCode(),
+                    notFoundException.getMessage(),
+                    request.getPath(),
+                    null,
+                    Instant.now()
+            );
+            return HttpResponse.status(HttpStatus.NOT_FOUND).body(problem).contentType(PROBLEM_CONTENT_TYPE);
+        }
+
+        // 3. Business Domain Failures (Illegal Arguments or State Mutations)
         if (exception instanceof IllegalArgumentException || exception instanceof IllegalStateException) {
             log.warn("[BUSINESS FAILURE] Domain rule violation: {}", exception.getMessage());
             Rfc7807Problem problem = new Rfc7807Problem(
@@ -76,7 +81,7 @@ public class GlobalExceptionHandler implements ExceptionHandler<Throwable, HttpR
             return HttpResponse.status(HttpStatus.UNPROCESSABLE_ENTITY).body(problem).contentType(PROBLEM_CONTENT_TYPE);
         }
 
-        // 3. Infrastructure & Unhandled Failures
+        // 4. Infrastructure & Unhandled Failures
         log.error("[INFRASTRUCTURE FAILURE] Unexpected system error during request to {}", request.getPath(), exception);
         Rfc7807Problem problem = new Rfc7807Problem(
                 URI.create("https://thinklab.com/probs/internal-server-error"),

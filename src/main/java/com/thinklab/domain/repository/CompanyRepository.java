@@ -5,6 +5,7 @@ import com.thinklab.domain.model.Company.Billing;
 import com.thinklab.domain.model.Company.Branch;
 import com.thinklab.domain.model.Company.CompanyStatus;
 import com.thinklab.domain.model.Company.Contact;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -35,6 +36,24 @@ public interface CompanyRepository {
      * @return A Mono emitting the Company if found, or empty if not.
      */
     Mono<Company> findById(UUID id);
+
+    /**
+     * Retrieves all Company aggregates reactively.
+     *
+     * @return A Flux emitting all Company aggregates.
+     */
+    Flux<Company> findAll();
+
+    /**
+     * Partial Mutation: Updates the basic information of the Company.
+     *
+     * @param id The UUID v4 of the company.
+     * @param corporateName New corporate name.
+     * @param tradeName New trade name.
+     * @param taxIdentifier New tax identifier.
+     * @return A Mono signaling completion.
+     */
+    Mono<Void> updateBasicInfo(UUID id, String corporateName, String tradeName, String taxIdentifier);
 
     /**
      * Partial Mutation: Updates the operational status of the Company.
@@ -75,4 +94,12 @@ public interface CompanyRepository {
      * @return A Mono signaling completion.
      */
     Mono<Void> updateBilling(UUID id, Billing billing);
+
+    /**
+     * Deletes a Company aggregate by its Sovereign Identity (UUID).
+     *
+     * @param id The UUID v4 of the company.
+     * @return A Mono signaling completion.
+     */
+    Mono<Void> deleteById(UUID id);
 }
