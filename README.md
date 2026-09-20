@@ -85,7 +85,7 @@ End-to-end traceability across non-blocking asynchronous thread boundaries is gu
 
 ```bash
 # Build the Distroless Container Image
-docker build -t thinklab-company-service:latest .
+docker build -t thinklab-party-reference-data-directory-service:latest .
 
 # Apply Kubernetes strict deployment manifest
 kubectl apply -f k8s-deployment.yaml
