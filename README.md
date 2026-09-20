@@ -77,7 +77,7 @@ End-to-end traceability across non-blocking asynchronous thread boundaries is gu
 # Clean, resolve dependencies, run AOT optimizations, and assemble Fat JAR
 ./gradlew clean build
 
-# Start the Reactive Service (Default Port: 8080)
+# Start the Reactive Service (Default Port: 8081)
 ./gradlew run
 ```
 
@@ -93,9 +93,9 @@ kubectl apply -f k8s-deployment.yaml
 
 ### Infrastructure and API Endpoints
 
-* **Health and Readiness Probes:** `http://localhost:8080/health`
-* **Swagger UI (Interactive API Contract):** `http://localhost:8080/swagger-ui`
-* **OpenAPI Specs (Raw YAML):** `http://localhost:8080/swagger/thinklab-party-reference-data-directory-service-domain-v2.0.0.yml`
+* **Health and Readiness Probes:** `http://localhost:8081/health`
+* **Swagger UI (Interactive API Contract):** `http://localhost:8081/swagger-ui`
+* **OpenAPI Specs (Raw YAML):** `http://localhost:8081/swagger/thinklab-party-reference-data-directory-service-domain-v2.0.0.yml`
 
 ### BIAN Behavior Qualifier Contract (`/party-reference-data-directory/v1`)
 
@@ -118,7 +118,7 @@ All mutations require the `X-Executor` header. There is no `DELETE` — `control
 Example:
 
 ```bash
-curl -X POST http://localhost:8080/party-reference-data-directory/v1/initiate \
+curl -X POST http://localhost:8081/party-reference-data-directory/v1/initiate \
   -H "Content-Type: application/json" \
   -H "X-Executor: admin-user-01" \
   -d '{"corporateName":"Acme Corp","tradeName":"Acme","taxIdentifier":"12345678000199","billing":{"billingEmail":"billing@acme.com","currency":"USD","taxRegime":"SIMPLES"}}'

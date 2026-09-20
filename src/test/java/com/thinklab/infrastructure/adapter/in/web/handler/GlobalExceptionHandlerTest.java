@@ -82,6 +82,19 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Should map IllegalArgumentException (domain guard / malformed input) to 400 instead of 500")
+    void testIllegalArgumentExceptionMapping() {
+        HttpResponse<Map<String, Object>> response = exceptionHandler.handle(request, new IllegalArgumentException("Corporate name is mandatory"));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
+        Map<String, Object> body = response.body();
+        assertEquals(400, body.get("status"));
+        assertEquals("ERR-VALIDATION-00400", body.get("error_code"));
+        assertTrue(body.get("detail").toString().contains("Corporate name is mandatory"));
+    }
+
+    @Test
     @DisplayName("Should map generic unexpected Exception to 500 Internal Server Error")
     void testGenericExceptionMapping() {
         RuntimeException exception = new RuntimeException("Unexpected internal failure");
