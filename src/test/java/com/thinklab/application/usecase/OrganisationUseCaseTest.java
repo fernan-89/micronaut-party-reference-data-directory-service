@@ -109,6 +109,7 @@ class OrganisationUseCaseTest {
     @Test
     void testControlOrganisationUseCaseActivate() {
         ControlOrganisationUseCase useCase = new ControlOrganisationUseCase(organisationRepository);
+        when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
         when(organisationRepository.updateStatus(organisationId, Organisation.OrganisationStatus.ACTIVE)).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.execute(organisationId, ControlOrganisationUseCase.Action.ACTIVATE))
@@ -118,10 +119,22 @@ class OrganisationUseCaseTest {
     @Test
     void testControlOrganisationUseCaseCancelReplacesDelete() {
         ControlOrganisationUseCase useCase = new ControlOrganisationUseCase(organisationRepository);
+        when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
         when(organisationRepository.updateStatus(organisationId, Organisation.OrganisationStatus.CANCELED)).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.execute(organisationId, ControlOrganisationUseCase.Action.CANCEL))
                 .verifyComplete();
+    }
+
+    @Test
+    void testControlOrganisationUseCaseRejectsIllegalTransition() {
+        ControlOrganisationUseCase useCase = new ControlOrganisationUseCase(organisationRepository);
+        organisation.changeStatus(Organisation.OrganisationStatus.CANCELED);
+        when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
+
+        StepVerifier.create(useCase.execute(organisationId, ControlOrganisationUseCase.Action.CANCEL))
+                .expectError(com.thinklab.domain.exception.InvalidOrganisationStatusException.class)
+                .verify();
     }
 
     @Test
@@ -151,6 +164,10 @@ class OrganisationUseCaseTest {
     void testControlOrganisationUnitUseCase() {
         ControlOrganisationUnitUseCase useCase = new ControlOrganisationUnitUseCase(organisationRepository);
         UUID unitId = UUID.randomUUID();
+        organisation.addOrganisationUnit(new Organisation.OrganisationUnit(
+                unitId, "Unit 1", "Street", "City", "Country", "12345", OrganisationUnitStatus.ACTIVE
+        ));
+        when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
         when(organisationRepository.updateOrganisationUnitStatus(organisationId, unitId, OrganisationUnitStatus.SUSPENDED)).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.execute(organisationId, unitId, OrganisationUnitStatus.SUSPENDED))

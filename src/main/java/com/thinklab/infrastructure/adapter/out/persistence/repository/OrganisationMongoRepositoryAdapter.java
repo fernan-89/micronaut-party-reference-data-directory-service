@@ -1,5 +1,6 @@
 package com.thinklab.infrastructure.adapter.out.persistence.repository;
 
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.reactivestreams.client.MongoClient;
@@ -17,6 +18,9 @@ import com.thinklab.infrastructure.adapter.out.persistence.entity.OrganisationDo
 import com.thinklab.infrastructure.adapter.out.persistence.entity.OrganisationDocument.OrganisationPersistenceMapper;
 import com.thinklab.infrastructure.adapter.out.persistence.entity.OrganisationDocument.OrganisationUnitDocument;
 import jakarta.inject.Singleton;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +40,21 @@ public class OrganisationMongoRepositoryAdapter implements OrganisationRepositor
 
     private static final Logger log = LoggerFactory.getLogger(OrganisationMongoRepositoryAdapter.class);
 
-    private static final String DATABASE_NAME = "company_db";
+    private static final String DATABASE_NAME = "thinklab_company_db";
     private static final String COLLECTION_NAME = "organisations";
     private static final String FIELD_ID = "_id";
     private static final String FIELD_UPDATED_AT = "updatedAt";
+
+    /**
+     * The MongoDB driver's default codec registry has no codec for arbitrary POJOs such as
+     * {@link OrganisationDocument} — it only covers BSON primitives. Without registering a
+     * {@link PojoCodecProvider}, every read/write against this collection fails with
+     * {@code CodecConfigurationException: Can't find a codec for ...}.
+     */
+    private static final CodecRegistry POJO_CODEC_REGISTRY = CodecRegistries.fromRegistries(
+            MongoClientSettings.getDefaultCodecRegistry(),
+            CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())
+    );
 
     private final MongoClient mongoClient;
 
@@ -48,7 +63,9 @@ public class OrganisationMongoRepositoryAdapter implements OrganisationRepositor
     }
 
     private MongoCollection<OrganisationDocument> getCollection() {
-        return mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME, OrganisationDocument.class);
+        return mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection(COLLECTION_NAME, OrganisationDocument.class)
+                .withCodecRegistry(POJO_CODEC_REGISTRY);
     }
 
     @Override
