@@ -49,8 +49,9 @@ class OrganisationMongoRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        when(mongoClient.getDatabase("company_db")).thenReturn(mongoDatabase);
+        when(mongoClient.getDatabase("thinklab_company_db")).thenReturn(mongoDatabase);
         when(mongoDatabase.getCollection("organisations", OrganisationDocument.class)).thenReturn(mongoCollection);
+        when(mongoCollection.withCodecRegistry(any())).thenReturn(mongoCollection);
         repositoryAdapter = new OrganisationMongoRepositoryAdapter(mongoClient);
     }
 
