@@ -60,3 +60,4 @@ logs/
 *.yml.local
 gradle.properties
 !gradle.properties.template
+.mcp.json
