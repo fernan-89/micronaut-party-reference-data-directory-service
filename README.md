@@ -1,12 +1,12 @@
-# Thinklab Company Service
+# Thinklab Party Reference Data Directory Service
 
-**Version:** v3.5.0-NASA-SRE-PROD
+**Version:** v2.0.0-BIAN
 
 **Status:** Production-Ready (Mission-Critical)
 
 ## Overview
 
-The Thinklab Company Service is a mission-critical, high-assurance microservice engineered for the authoritative management of the complete lifecycle of corporate entities, branches, contacts, and billing configurations. Developed using Java 21 and the Micronaut Framework, this service utilizes strict Hexagonal Architecture (Ports and Adapters) combined with a fully Reactive Stack to ensure high throughput, zero-blocking I/O, and absolute structural maintainability.
+The Thinklab Party Reference Data Directory Service (formerly "Company Service") is a mission-critical, high-assurance microservice engineered for the authoritative management of the complete lifecycle of corporate entities (`Organisation`), their subordinate units (`OrganisationUnit`, formerly "Branch"), contacts, and billing configurations. It implements the BIAN (Banking Industry Architecture Network) `party-reference-data-directory` Service Domain: every route follows the `/{behavior-qualifier}` convention (`initiate`, `retrieve`, `update`, `control`) instead of ad-hoc REST CRUD verbs — see ADR-013/014/015. Developed using Java 21 and the Micronaut Framework, this service utilizes strict Hexagonal Architecture (Ports and Adapters) combined with a fully Reactive Stack to ensure high throughput, zero-blocking I/O, and absolute structural maintainability.
 
 Designed under strict Site Reliability Engineering (SRE) and Zero-Trust principles, the service features deterministic containerization, Ahead-of-Time (AOT) bytecode optimizations, and resilient telemetry pipelines capable of surviving transient infrastructure failures.
 
@@ -38,14 +38,14 @@ src/main/java/com/thinklab/
 
 The Core Domain is completely decoupled from web and persistence layers.
 
-* **Domain Purity:** Domain entities (`Company`) are devoid of `@Serdeable`, `@Schema`, or `@MappedEntity` annotations.
-* **Projection Mapping:** All input/output crosses boundaries via explicit Data Transfer Objects (DTOs) utilizing static factory transformations (`CompanyMapper`).
+* **Domain Purity:** Domain entities (`Organisation`) are devoid of `@Serdeable`, `@Schema`, or `@MappedEntity` annotations.
+* **Projection Mapping:** All input/output crosses boundaries via explicit Data Transfer Objects (DTOs) utilizing static factory transformations (`OrganisationMapper`).
 * **Resilient Exception Boundaries:** Structural decoupling of Business Exceptions from Infrastructure Failures. All errors are projected into standardized **RFC 7807 (Problem Details)** payloads via a unified `GlobalExceptionHandler`.
 
 ### 2. Identity Sovereignty & Partial State Mutations (ADR-002, ADR-005)
 
 * **UUID Standardization:** Mandatory enforcement of native `java.util.UUID` for all primary and correlation identifiers to ensure optimal MongoDB BSON indexing and prevent type contamination.
-* **Explicit Partial Updates:** Monolithic saves are strictly reserved for aggregate creation. State mutations (e.g., status change, basic info update, adding branches/contacts, updating billing) utilize targeted `$set` and `$push` query updates (`_id` bounded) via custom repository ports.
+* **Explicit Partial Updates:** Monolithic saves are strictly reserved for aggregate creation. State mutations (e.g., status change, basic info update, adding organisation units/contacts, updating billing) utilize targeted `$set` and `$push` query updates (`_id` bounded) via custom repository ports. There is no physical delete — `control/cancel` is a terminal, soft status transition (ADR-014).
 
 ### 3. Proactive Initialization & Synchronous Barriers (ADR-006, ADR-007)
 
@@ -95,4 +95,31 @@ kubectl apply -f k8s-deployment.yaml
 
 * **Health and Readiness Probes:** `http://localhost:8080/health`
 * **Swagger UI (Interactive API Contract):** `http://localhost:8080/swagger-ui`
-* **OpenAPI Specs (Raw YAML):** `http://localhost:8080/swagger/thinklab-company-service-1.0.0.yml`
+* **OpenAPI Specs (Raw YAML):** `http://localhost:8080/swagger/thinklab-party-reference-data-directory-service-domain-v2.0.0.yml`
+
+### BIAN Behavior Qualifier Contract (`/party-reference-data-directory/v1`)
+
+All mutations require the `X-Executor` header. There is no `DELETE` — `control/cancel` replaces the previous physical deletion.
+
+| Behavior Qualifier | Method & Path |
+|---|---|
+| initiate | `POST /party-reference-data-directory/v1/initiate` |
+| retrieve (single) | `GET /party-reference-data-directory/v1/{id}/retrieve` |
+| retrieve (collection) | `GET /party-reference-data-directory/v1/retrieve` |
+| update | `PUT /party-reference-data-directory/v1/{id}/update` |
+| control/activate, suspend, cancel | `PUT /party-reference-data-directory/v1/{id}/control/{action}` |
+| billing/update | `PUT /party-reference-data-directory/v1/{id}/billing/update` |
+| organisation-unit/initiate | `POST /party-reference-data-directory/v1/{id}/organisation-unit/initiate` |
+| organisation-unit/retrieve (collection & single) | `GET /party-reference-data-directory/v1/{id}/organisation-unit/retrieve`, `GET .../organisation-unit/{unitId}/retrieve` |
+| organisation-unit/control/suspend, reactivate | `PUT /party-reference-data-directory/v1/{id}/organisation-unit/{unitId}/control/{action}` |
+| contact/initiate | `POST /party-reference-data-directory/v1/{id}/contact/initiate` |
+| contact/retrieve | `GET /party-reference-data-directory/v1/{id}/contact/retrieve` |
+
+Example:
+
+```bash
+curl -X POST http://localhost:8080/party-reference-data-directory/v1/initiate \
+  -H "Content-Type: application/json" \
+  -H "X-Executor: admin-user-01" \
+  -d '{"corporateName":"Acme Corp","tradeName":"Acme","taxIdentifier":"12345678000199","billing":{"billingEmail":"billing@acme.com","currency":"USD","taxRegime":"SIMPLES"}}'
+```

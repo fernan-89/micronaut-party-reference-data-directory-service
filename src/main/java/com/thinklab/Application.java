@@ -13,7 +13,7 @@ import java.security.Security;
 import java.util.TimeZone;
 
 /**
- * Main Entry Point: Bootstrap class for the Thinklab Company Service.
+ * Main Entry Point: Bootstrap class for the Thinklab Party Reference Data Directory Service.
  *
  * <p><b>Architectural Role:</b>
  * This class orchestrates the application bootstrap sequence using the Micronaut framework, ensuring

@@ -23,9 +23,9 @@ import io.swagger.v3.oas.annotations.info.License;
  */
 @OpenAPIDefinition(
         info = @Info(
-                title = "Thinklab Company Service",
-                version = "v1.0.0",
-                description = "Enterprise-grade company lifecycle management, reactive persistence, and forensic auditing service. Built on Zero-Trust principles with Project Reactor.",
+                title = "Thinklab Party Reference Data Directory Service Domain",
+                version = "v2.0.0",
+                description = "BIAN-aligned Service Domain (Control Record: Organisation; subordinate: OrganisationUnit) for corporate party lifecycle management, reactive persistence, and forensic auditing. All routes follow the /party-reference-data-directory/v1/{behavior-qualifier} convention (initiate, retrieve, update, control). Built on Zero-Trust principles with Project Reactor.",
                 contact = @Contact(
                         name = "Thinklab SRE & Security Operations",
                         email = "sre-core@thinklab.com",
