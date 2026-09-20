@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
     "name": "Company Service - Comprehensive Lifecycle & Telemetry Suite",
-    "description": "Enterprise-grade E2E Postman Suite for the Thinklab Company Service. Covers complete company lifecycle, sovereign UUID mutations, branch/contact management, RFC 7807 error assertions, and automated W3C distributed traceparent correlation.",
+    "description": "Enterprise-grade E2E Postman Suite for the Party Reference Data Directory Service Domain (BIAN-aligned, ADR-013/014/015). Covers the complete Organisation lifecycle under /party-reference-data-directory/v1 (initiate, retrieve, update, control/activate|suspend|cancel), the promoted OrganisationUnit subordinate resource (own ACTIVE/SUSPENDED lifecycle), contact capture, mandatory X-Executor auditing, RFC 7807 error_code assertions, and automated W3C distributed traceparent correlation.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "39879181"
   },
@@ -161,10 +161,10 @@
       ]
     },
     {
-      "name": "01. Lifecycle Scenarios",
+      "name": "01. Lifecycle Scenarios (BIAN Behavior Qualifiers)",
       "item": [
         {
-          "name": "01. Create Company (Aggregate Root)",
+          "name": "01. Initiate Organisation (Control Record)",
           "event": [
             {
               "listen": "test",
@@ -172,12 +172,12 @@
                 "exec": [
                   "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
                   "const json = pm.response.json();",
-                  "pm.test('UUID and LegalName are present', () => {",
+                  "pm.test('UUID and corporateName are present', () => {",
                   "    pm.expect(json.id).to.not.be.undefined;",
-                  "    pm.expect(json.legalName).to.eql('Thinklab Global Operations Ltd');",
-                  "    pm.expect(json.status).to.eql('DRAFT');",
+                  "    pm.expect(json.corporateName).to.eql('Thinklab Global Operations Ltd');",
+                  "    pm.expect(json.status).to.eql('PENDING_ACTIVATION');",
                   "});",
-                  "pm.environment.set('companyId', json.id);"
+                  "pm.environment.set('organisationId', json.id);"
                 ],
                 "type": "text/javascript"
               }
@@ -186,24 +186,22 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Executor", "value": "{{executor}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"legalName\": \"Thinklab Global Operations Ltd\",\n  \"tradeName\": \"Thinklab Operations\",\n  \"taxId\": \"12.345.678/0001-90\",\n  \"notes\": \"Initial creation in test mesh\"\n}"
+              "raw": "{\n  \"corporateName\": \"Thinklab Global Operations Ltd\",\n  \"tradeName\": \"Thinklab Operations\",\n  \"taxIdentifier\": \"12345678000190\",\n  \"billing\": {\n    \"billingEmail\": \"billing@thinklab.com\",\n    \"currency\": \"USD\",\n    \"taxRegime\": \"STANDARD\"\n  }\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/companies",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/initiate",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies"]
+              "path": ["party-reference-data-directory", "v1", "initiate"]
             }
           }
         },
         {
-          "name": "02. Get Company By ID",
+          "name": "02. Retrieve Organisation By ID",
           "event": [
             {
               "listen": "test",
@@ -211,8 +209,8 @@
                 "exec": [
                   "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
                   "const json = pm.response.json();",
-                  "pm.test('Company matches created ID', () => {",
-                  "    pm.expect(json.id).to.eql(pm.environment.get('companyId'));",
+                  "pm.test('Organisation matches created ID', () => {",
+                  "    pm.expect(json.id).to.eql(pm.environment.get('organisationId'));",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -223,25 +221,20 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/companies/{{companyId}}",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/retrieve",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "{{companyId}}"]
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "retrieve"]
             }
           }
         },
         {
-          "name": "03. Update Basic Info",
+          "name": "03. Update Organisation (Basic Info)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-                  "const json = pm.response.json();",
-                  "pm.test('Legal name and trade name updated', () => {",
-                  "    pm.expect(json.legalName).to.eql('Thinklab Global Operations International S.A.');",
-                  "    pm.expect(json.tradeName).to.eql('Thinklab Corp');",
-                  "});"
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
                 ],
                 "type": "text/javascript"
               }
@@ -250,55 +243,42 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Executor", "value": "{{executor}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"legalName\": \"Thinklab Global Operations International S.A.\",\n  \"tradeName\": \"Thinklab Corp\",\n  \"notes\": \"Updated via Postman E2E Test\"\n}"
+              "raw": "{\n  \"corporateName\": \"Thinklab Global Operations International S.A.\",\n  \"tradeName\": \"Thinklab Corp\",\n  \"taxIdentifier\": \"12345678000190\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/companies/{{companyId}}",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/update",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "{{companyId}}"]
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "update"]
             }
           }
         },
         {
-          "name": "04. Update Status (ACTIVE)",
+          "name": "04. Control: Activate Organisation",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-                  "const json = pm.response.json();",
-                  "pm.test('Status is ACTIVE', () => {",
-                  "    pm.expect(json.status).to.eql('ACTIVE');",
-                  "});"
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
                 ],
                 "type": "text/javascript"
               }
             }
           ],
           "request": {
-            "method": "PATCH",
+            "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "X-Executor", "value": "{{executor}}" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"ACTIVE\"\n}"
-            },
             "url": {
-              "raw": "{{base_url}}/api/v1/companies/{{companyId}}/status",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/activate",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "{{companyId}}", "status"]
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "control", "activate"]
             }
           }
         },
@@ -309,13 +289,7 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-                  "const json = pm.response.json();",
-                  "pm.test('Billing information verified', () => {",
-                  "    pm.expect(json.billing).to.not.be.undefined;",
-                  "    pm.expect(json.billing.currency).to.eql('USD');",
-                  "    pm.expect(json.billing.taxExempt).to.eql(false);",
-                  "});"
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
                 ],
                 "type": "text/javascript"
               }
@@ -324,38 +298,28 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Executor", "value": "{{executor}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"billingEmail\": \"billing@thinklab.com\",\n  \"currency\": \"USD\",\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"taxExempt\": false,\n  \"creditLimit\": 50000.00\n}"
+              "raw": "{\n  \"billingEmail\": \"billing@thinklab.com\",\n  \"currency\": \"USD\",\n  \"taxRegime\": \"STANDARD\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/companies/{{companyId}}/billing",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/billing/update",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "{{companyId}}", "billing"]
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "billing", "update"]
             }
           }
         },
         {
-          "name": "06. Add Branch",
+          "name": "06. Initiate Organisation Unit (formerly Branch)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-                  "const json = pm.response.json();",
-                  "pm.test('Branch is present in aggregate', () => {",
-                  "    pm.expect(json.branches).to.be.an('array');",
-                  "    pm.expect(json.branches.length).to.be.above(0);",
-                  "    const branch = json.branches.find(b => b.name === 'Sao Paulo Regional Hub');",
-                  "    pm.expect(branch).to.not.be.undefined;",
-                  "    pm.expect(branch.isHeadquarters).to.eql(true);",
-                  "});"
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));"
                 ],
                 "type": "text/javascript"
               }
@@ -364,24 +328,22 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Executor", "value": "{{executor}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Sao Paulo Regional Hub\",\n  \"code\": \"BR-SP-01\",\n  \"isHeadquarters\": true,\n  \"street\": \"Av. Paulista\",\n  \"number\": \"1000\",\n  \"complement\": \"Floor 15\",\n  \"district\": \"Bela Vista\",\n  \"city\": \"Sao Paulo\",\n  \"state\": \"SP\",\n  \"postalCode\": \"01310-100\",\n  \"country\": \"Brazil\"\n}"
+              "raw": "{\n  \"unitName\": \"Sao Paulo Regional Hub\",\n  \"address\": \"Av. Paulista, 1000\",\n  \"city\": \"Sao Paulo\",\n  \"country\": \"Brazil\",\n  \"zipCode\": \"01310-100\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/companies/{{companyId}}/branches",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/initiate",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "{{companyId}}", "branches"]
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "initiate"]
             }
           }
         },
         {
-          "name": "07. Add Contact",
+          "name": "07. Retrieve Organisation Units (List)",
           "event": [
             {
               "listen": "test",
@@ -389,12 +351,147 @@
                 "exec": [
                   "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
                   "const json = pm.response.json();",
-                  "pm.test('Contact is present in aggregate', () => {",
-                  "    pm.expect(json.contacts).to.be.an('array');",
-                  "    pm.expect(json.contacts.length).to.be.above(0);",
-                  "    const contact = json.contacts.find(c => c.name === 'Linus Torvalds');",
+                  "pm.test('Contains the newly created unit as ACTIVE', () => {",
+                  "    pm.expect(json).to.be.an('array').that.is.not.empty;",
+                  "    const unit = json.find(u => u.unitName === 'Sao Paulo Regional Hub');",
+                  "    pm.expect(unit).to.not.be.undefined;",
+                  "    pm.expect(unit.status).to.eql('ACTIVE');",
+                  "    pm.environment.set('organisationUnitId', unit.unitId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/retrieve",
+              "host": ["{{base_url}}"],
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "retrieve"]
+            }
+          }
+        },
+        {
+          "name": "08. Retrieve Organisation Unit By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Unit ID matches environment', () => pm.expect(json.unitId).to.eql(pm.environment.get('organisationUnitId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/{{organisationUnitId}}/retrieve",
+              "host": ["{{base_url}}"],
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "{{organisationUnitId}}", "retrieve"]
+            }
+          }
+        },
+        {
+          "name": "09. Control: Suspend Organisation Unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "X-Executor", "value": "{{executor}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/{{organisationUnitId}}/control/suspend",
+              "host": ["{{base_url}}"],
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "{{organisationUnitId}}", "control", "suspend"]
+            }
+          }
+        },
+        {
+          "name": "10. Control: Reactivate Organisation Unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "X-Executor", "value": "{{executor}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/{{organisationUnitId}}/control/reactivate",
+              "host": ["{{base_url}}"],
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "{{organisationUnitId}}", "control", "reactivate"]
+            }
+          }
+        },
+        {
+          "name": "11. Capture Contact (Initiate)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Executor", "value": "{{executor}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Linus Torvalds\",\n  \"email\": \"linus@thinklab.com\",\n  \"phoneNumber\": \"+1-555-0199\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/contact/initiate",
+              "host": ["{{base_url}}"],
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "contact", "initiate"]
+            }
+          }
+        },
+        {
+          "name": "12. Retrieve Contacts (List)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Contact is present', () => {",
+                  "    pm.expect(json).to.be.an('array').that.is.not.empty;",
+                  "    const contact = json.find(c => c.fullName === 'Linus Torvalds');",
                   "    pm.expect(contact).to.not.be.undefined;",
-                  "    pm.expect(contact.isPrimary).to.eql(true);",
+                  "    pm.expect(contact.role).to.eql('ADMIN');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -402,26 +499,17 @@
             }
           ],
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Linus Torvalds\",\n  \"role\": \"Chief Kernel Architect\",\n  \"email\": \"linus@thinklab.com\",\n  \"phone\": \"+1-555-0199\",\n  \"isPrimary\": true\n}"
-            },
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/companies/{{companyId}}/contacts",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/contact/retrieve",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "{{companyId}}", "contacts"]
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "contact", "retrieve"]
             }
           }
         },
         {
-          "name": "08. List All Companies",
+          "name": "13. Retrieve All Organisations",
           "event": [
             {
               "listen": "test",
@@ -442,50 +530,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/companies",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/retrieve",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies"]
+              "path": ["party-reference-data-directory", "v1", "retrieve"]
             }
           }
         },
         {
-          "name": "09. Update Status (SUSPENDED)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-                  "const json = pm.response.json();",
-                  "pm.test('Status transitioned to SUSPENDED', () => {",
-                  "    pm.expect(json.status).to.eql('SUSPENDED');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"SUSPENDED\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/companies/{{companyId}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "{{companyId}}", "status"]
-            }
-          }
-        },
-        {
-          "name": "10. Delete Company",
+          "name": "14. Control: Suspend Organisation",
           "event": [
             {
               "listen": "test",
@@ -498,12 +550,39 @@
             }
           ],
           "request": {
-            "method": "DELETE",
-            "header": [],
+            "method": "PUT",
+            "header": [
+              { "key": "X-Executor", "value": "{{executor}}" }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/v1/companies/{{companyId}}",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/suspend",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "{{companyId}}"]
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "control", "suspend"]
+            }
+          }
+        },
+        {
+          "name": "15. Control: Cancel Organisation (Terminal, replaces DELETE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "X-Executor", "value": "{{executor}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "control", "cancel"]
             }
           }
         }
@@ -513,7 +592,7 @@
       "name": "02. Negative Tests & Boundary Validation",
       "item": [
         {
-          "name": "01. Create Company - Blank Legal Name (400)",
+          "name": "01. Initiate Organisation - Blank Corporate Name (400)",
           "event": [
             {
               "listen": "test",
@@ -523,7 +602,7 @@
                   "const json = pm.response.json();",
                   "pm.test('RFC 7807 problem details structure', () => {",
                   "    pm.expect(json.status).to.eql(400);",
-                  "    pm.expect(json.title).to.not.be.undefined;",
+                  "    pm.expect(json.error_code).to.eql('ERR-VALIDATION-00400');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -533,24 +612,51 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Executor", "value": "{{executor}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"legalName\": \"\",\n  \"tradeName\": \"No Name Inc\",\n  \"taxId\": \"12.345.678/0001-90\"\n}"
+              "raw": "{\n  \"corporateName\": \"\",\n  \"tradeName\": \"No Name Inc\",\n  \"taxIdentifier\": \"12345678000190\",\n  \"billing\": {\n    \"billingEmail\": \"billing@thinklab.com\",\n    \"currency\": \"USD\",\n    \"taxRegime\": \"STANDARD\"\n  }\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/companies",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/initiate",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies"]
+              "path": ["party-reference-data-directory", "v1", "initiate"]
             }
           }
         },
         {
-          "name": "02. Get Company - Non-existent UUID (404)",
+          "name": "02. Initiate Organisation - Missing X-Executor Header (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"corporateName\": \"No Executor Header Inc\",\n  \"tradeName\": \"No Executor\",\n  \"taxIdentifier\": \"12345678000190\",\n  \"billing\": {\n    \"billingEmail\": \"billing@thinklab.com\",\n    \"currency\": \"USD\",\n    \"taxRegime\": \"STANDARD\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/party-reference-data-directory/v1/initiate",
+              "host": ["{{base_url}}"],
+              "path": ["party-reference-data-directory", "v1", "initiate"]
+            }
+          }
+        },
+        {
+          "name": "03. Retrieve Organisation - Non-existent UUID (404)",
           "event": [
             {
               "listen": "test",
@@ -558,9 +664,9 @@
                 "exec": [
                   "pm.test('Status is 404 Not Found', () => pm.response.to.have.status(404));",
                   "const json = pm.response.json();",
-                  "pm.test('RFC 7807 404 details', () => {",
+                  "pm.test('RFC 7807 error_code is ERR-ORG-00404', () => {",
                   "    pm.expect(json.status).to.eql(404);",
-                  "    pm.expect(json.detail).to.include('Company not found');",
+                  "    pm.expect(json.error_code).to.eql('ERR-ORG-00404');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -571,13 +677,46 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/companies/00000000-0000-0000-0000-000000000000",
+              "raw": "{{base_url}}/party-reference-data-directory/v1/00000000-0000-0000-0000-000000000000/retrieve",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "companies", "00000000-0000-0000-0000-000000000000"]
+              "path": ["party-reference-data-directory", "v1", "00000000-0000-0000-0000-000000000000", "retrieve"]
+            }
+          }
+        },
+        {
+          "name": "04. Control: Cancel Already-CANCELED Organisation (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 409 Conflict', () => pm.response.to.have.status(409));",
+                  "const json = pm.response.json();",
+                  "pm.test('RFC 7807 error_code is ERR-ORG-00409', () => pm.expect(json.error_code).to.eql('ERR-ORG-00409'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "X-Executor", "value": "{{executor}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "control", "cancel"]
             }
           }
         }
       ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
     }
   ]
 }
