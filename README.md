@@ -123,3 +123,7 @@ curl -X POST http://localhost:8081/party-reference-data-directory/v1/initiate \
   -H "X-Executor: admin-user-01" \
   -d '{"corporateName":"Acme Corp","tradeName":"Acme","taxIdentifier":"12345678000199","billing":{"billingEmail":"billing@acme.com","currency":"USD","taxRegime":"SIMPLES"}}'
 ```
+
+## License
+
+Proprietary - all rights reserved. See [LICENSE](LICENSE). This software is not open source.
