@@ -91,17 +91,13 @@ public class OrganisationDocument {
                 doc.setBilling(new BillingDocument(organisation.getBilling().billingEmail(), organisation.getBilling().currency(), organisation.getBilling().taxRegime()));
             }
 
-            if (organisation.getOrganisationUnits() != null) {
-                doc.setOrganisationUnits(organisation.getOrganisationUnits().stream()
-                        .map(u -> new OrganisationUnitDocument(u.unitId(), u.unitName(), u.address(), u.city(), u.country(), u.zipCode(), u.status().name()))
-                        .collect(Collectors.toList()));
-            }
+            doc.setOrganisationUnits(organisation.getOrganisationUnits().stream()
+                    .map(u -> new OrganisationUnitDocument(u.unitId(), u.unitName(), u.address(), u.city(), u.country(), u.zipCode(), u.status().name()))
+                    .collect(Collectors.toList()));
 
-            if (organisation.getContacts() != null) {
-                doc.setContacts(organisation.getContacts().stream()
-                        .map(c -> new ContactDocument(c.contactId(), c.fullName(), c.email(), c.phoneNumber(), c.role().name()))
-                        .collect(Collectors.toList()));
-            }
+            doc.setContacts(organisation.getContacts().stream()
+                    .map(c -> new ContactDocument(c.contactId(), c.fullName(), c.email(), c.phoneNumber(), c.role().name()))
+                    .collect(Collectors.toList()));
 
             return doc;
         }

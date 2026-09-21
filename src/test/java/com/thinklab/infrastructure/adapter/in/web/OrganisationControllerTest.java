@@ -235,4 +235,17 @@ class OrganisationControllerTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void testRetrieveOrganisationUnitById() {
+        UUID unitId = UUID.randomUUID();
+        OrganisationResponse.OrganisationUnitResponse unit = new OrganisationResponse.OrganisationUnitResponse(unitId, "HQ", "a", "c", "BR", "z", "ACTIVE");
+        OrganisationResponse withUnit = new OrganisationResponse(organisationId, "Acme Corp", "Acme", "12345678000199", "ACTIVE", null,
+                java.util.List.of(unit), Collections.emptyList(), Instant.now(), Instant.now());
+        when(retrieveOrganisationUseCase.execute(organisationId)).thenReturn(Mono.just(withUnit));
+
+        StepVerifier.create(organisationController.retrieveOrganisationUnitById(organisationId, unitId))
+                .assertNext(r -> org.junit.jupiter.api.Assertions.assertEquals(unitId, r.body().unitId()))
+                .verifyComplete();
+    }
 }

@@ -108,4 +108,16 @@ class GlobalExceptionHandlerTest {
         assertEquals(500, body.get("status"));
         assertEquals("ERR-INTERNAL-00500", body.get("error_code"));
     }
+
+    @Test
+    @DisplayName("a trace id from the X-Trace-Id header is honoured and a blank one replaced")
+    void traceIdFromHeader() {
+        HttpHeaders headers = Mockito.mock(HttpHeaders.class);
+        Mockito.when(request.getHeaders()).thenReturn(headers);
+        Mockito.when(headers.get("X-Trace-Id")).thenReturn("header-trace");
+        assertEquals(404, exceptionHandler.handle(request, new OrganisationNotFoundException("x")).getStatus().getCode());
+
+        Mockito.when(headers.get("X-Trace-Id")).thenReturn(" ");
+        assertEquals(404, exceptionHandler.handle(request, new OrganisationNotFoundException("x")).getStatus().getCode());
+    }
 }

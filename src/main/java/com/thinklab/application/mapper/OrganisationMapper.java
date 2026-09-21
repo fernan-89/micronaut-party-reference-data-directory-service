@@ -13,7 +13,6 @@ import com.thinklab.domain.model.Organisation.Billing;
 import com.thinklab.domain.model.Organisation.Contact;
 import com.thinklab.domain.model.Organisation.OrganisationUnit;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -65,7 +64,7 @@ public final class OrganisationMapper {
                 organisation.getBilling().taxRegime()
         ) : null;
 
-        List<OrganisationUnitResponse> unitResponses = organisation.getOrganisationUnits() != null ? organisation.getOrganisationUnits().stream()
+        List<OrganisationUnitResponse> unitResponses = organisation.getOrganisationUnits().stream()
                 .map(u -> new OrganisationUnitResponse(
                         u.unitId(),
                         u.unitName(),
@@ -73,11 +72,11 @@ public final class OrganisationMapper {
                         u.city(),
                         u.country(),
                         u.zipCode(),
-                        u.status() != null ? u.status().name() : null
+                        u.status().name()
                 ))
-                .collect(Collectors.toList()) : Collections.emptyList();
+                .collect(Collectors.toList());
 
-        List<ContactResponse> contactResponses = organisation.getContacts() != null ? organisation.getContacts().stream()
+        List<ContactResponse> contactResponses = organisation.getContacts().stream()
                 .map(c -> new ContactResponse(
                         c.contactId(),
                         c.fullName(),
@@ -85,14 +84,14 @@ public final class OrganisationMapper {
                         c.phoneNumber(),
                         c.role() != null ? c.role().name() : null
                 ))
-                .collect(Collectors.toList()) : Collections.emptyList();
+                .collect(Collectors.toList());
 
         return new OrganisationResponse(
                 organisation.getId(),
                 organisation.getCorporateName(),
                 organisation.getTradeName(),
                 organisation.getTaxIdentifier(),
-                organisation.getStatus() != null ? organisation.getStatus().name() : null,
+                organisation.getStatus().name(),
                 billingResponse,
                 unitResponses,
                 contactResponses,
