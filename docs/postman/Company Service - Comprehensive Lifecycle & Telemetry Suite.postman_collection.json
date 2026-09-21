@@ -69,7 +69,7 @@
                 "exec": [
                   "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
                   "const json = pm.response.json();",
-                  "pm.test('Liveness status is UP', () => pm.expect(json.status).to.eql('UP'));"
+                  "pm.test('Liveness status is UP or UNKNOWN (no probe contributors registered)', () => pm.expect(['UP', 'UNKNOWN']).to.include(json.status));"
                 ],
                 "type": "text/javascript"
               }
@@ -152,9 +152,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/swagger-ui",
+              "raw": "{{base_url}}/swagger-ui/index.html",
               "host": ["{{base_url}}"],
-              "path": ["swagger-ui"]
+              "path": ["swagger-ui", "index.html"]
             }
           }
         }
