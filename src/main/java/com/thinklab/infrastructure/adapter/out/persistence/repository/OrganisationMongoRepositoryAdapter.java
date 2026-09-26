@@ -1,10 +1,12 @@
 package com.thinklab.infrastructure.adapter.out.persistence.repository;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoCollection;
+import io.micronaut.context.annotation.Property;
 import com.thinklab.domain.exception.OrganisationNotFoundException;
 import com.thinklab.domain.model.Organisation;
 import com.thinklab.domain.model.Organisation.Billing;
@@ -28,6 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -40,7 +43,8 @@ public class OrganisationMongoRepositoryAdapter implements OrganisationRepositor
 
     private static final Logger log = LoggerFactory.getLogger(OrganisationMongoRepositoryAdapter.class);
 
-    private static final String DATABASE_NAME = "thinklab_company_db";
+    /** Used only when {@code mongodb.uri} names no database. */
+    static final String DEFAULT_DATABASE = "thinklab_company_db";
     private static final String COLLECTION_NAME = "organisations";
     private static final String FIELD_ID = "_id";
     private static final String FIELD_UPDATED_AT = "updatedAt";
@@ -57,13 +61,21 @@ public class OrganisationMongoRepositoryAdapter implements OrganisationRepositor
     );
 
     private final MongoClient mongoClient;
+    private final String database;
 
-    public OrganisationMongoRepositoryAdapter(MongoClient mongoClient) {
+    /**
+     * The database comes from {@code mongodb.uri}, the same property the MongoDB client and the kit's
+     * warm-up use. It used to be hardcoded, so pointing {@code MONGODB_URI} at another database moved
+     * everything except this adapter's reads and writes.
+     */
+    public OrganisationMongoRepositoryAdapter(MongoClient mongoClient, @Property(name = "mongodb.uri") String mongoUri) {
         this.mongoClient = mongoClient;
+        String configured = new ConnectionString(Objects.requireNonNull(mongoUri, "mongodb.uri cannot be null.")).getDatabase();
+        this.database = configured != null ? configured : DEFAULT_DATABASE;
     }
 
     private MongoCollection<OrganisationDocument> getCollection() {
-        return mongoClient.getDatabase(DATABASE_NAME)
+        return mongoClient.getDatabase(database)
                 .getCollection(COLLECTION_NAME, OrganisationDocument.class)
                 .withCodecRegistry(POJO_CODEC_REGISTRY);
     }
