@@ -1,12 +1,12 @@
 # Thinklab Party Reference Data Directory Service
 
-**Version:** v2.0.0-BIAN
+**Version:** 2.0.0
 
-**Status:** Production-Ready (Mission-Critical)
+**Status:** Reference implementation — portfolio project
 
 ## Overview
 
-The Thinklab Party Reference Data Directory Service (formerly "Company Service") is a mission-critical, high-assurance microservice engineered for the authoritative management of the complete lifecycle of corporate entities (`Organisation`), their subordinate units (`OrganisationUnit`, formerly "Branch"), contacts, and billing configurations. It implements the BIAN (Banking Industry Architecture Network) `party-reference-data-directory` Service Domain: every route follows the `/{behavior-qualifier}` convention (`initiate`, `retrieve`, `update`, `control`) instead of ad-hoc REST CRUD verbs — see ADR-013/014/015. Developed using Java 21 and the Micronaut Framework, this service utilizes strict Hexagonal Architecture (Ports and Adapters) combined with a fully Reactive Stack to ensure high throughput, zero-blocking I/O, and absolute structural maintainability.
+The Thinklab Party Reference Data Directory Service (formerly "Company Service") is a microservice for the authoritative management of the complete lifecycle of corporate entities (`Organisation`), their subordinate units (`OrganisationUnit`, formerly "Branch"), contacts, and billing configurations. It implements the BIAN (Banking Industry Architecture Network) `party-reference-data-directory` Service Domain: every route follows the `/{behavior-qualifier}` convention (`initiate`, `retrieve`, `update`, `control`) instead of ad-hoc REST CRUD verbs — see ADR-013/014/015. Developed using Java 21 and the Micronaut Framework, this service utilizes strict Hexagonal Architecture (Ports and Adapters) combined with a fully Reactive Stack to ensure high throughput, zero-blocking I/O, and absolute structural maintainability.
 
 Designed under strict Site Reliability Engineering (SRE) and Zero-Trust principles, the service features deterministic containerization, Ahead-of-Time (AOT) bytecode optimizations, and resilient telemetry pipelines capable of surviving transient infrastructure failures.
 
@@ -18,7 +18,7 @@ Designed under strict Site Reliability Engineering (SRE) and Zero-Trust principl
 * **Persistence:** Reactive MongoDB utilizing BSON Binary UUID Subtype 4 for optimized indexing
 * **Observability:** W3C Trace Context, SLF4J, Logback (Async), SRE Forensics, and Project Reactor Hooks
 * **Security & Containerization:** Google Distroless (nonroot), Read-Only Root Filesystems, Zero-Trust Capabilities
-* **Testing Suite:** JUnit 5, Mockito (Unit), and Testcontainers (Integration)
+* **Testing Suite:** JUnit 5, Mockito and Reactor Test (unit tests)
 * **Documentation:** OpenAPI 3.0 / Swagger (Generated statically at compile-time)
 
 ---
