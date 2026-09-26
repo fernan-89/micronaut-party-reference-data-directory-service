@@ -18,7 +18,7 @@ Designed under strict Site Reliability Engineering (SRE) and Zero-Trust principl
 * **Persistence:** Reactive MongoDB utilizing BSON Binary UUID Subtype 4 for optimized indexing
 * **Observability:** W3C Trace Context, SLF4J, Logback (Async), SRE Forensics, and Project Reactor Hooks
 * **Security & Containerization:** Google Distroless (nonroot), Read-Only Root Filesystems, Zero-Trust Capabilities
-* **Testing Suite:** JUnit 5 and Mockito, plus Micronaut Test for application-context tests
+* **Testing Suite:** JUnit 5 and Mockito (unit, 100% line/branch gate), Micronaut Test, and Testcontainers (integration against a real MongoDB replica set)
 * **Documentation:** OpenAPI 3.0 / Swagger (Generated statically at compile-time)
 
 ---
@@ -123,6 +123,18 @@ curl -X POST http://localhost:8081/party-reference-data-directory/v1/initiate \
   -H "X-Executor: admin-user-01" \
   -d '{"corporateName":"Acme Corp","tradeName":"Acme","taxIdentifier":"12345678000199","billing":{"billingEmail":"billing@acme.com","currency":"USD","taxRegime":"SIMPLES"}}'
 ```
+
+### Automated Tests
+
+```bash
+./gradlew test               # unit suite + 100% line/branch coverage gate (no Docker needed)
+./gradlew integrationTest    # Testcontainers suite against a real MongoDB replica set (needs Docker)
+./gradlew check              # both, as CI runs it
+```
+
+The integration suite (`src/integrationTest`, platform
+[ADR-025](https://github.com/fernan-89/micronaut-hash-token-registry-service/blob/master/docs/adr/025-integration-tests-with-testcontainers.md))
+runs the Organisation aggregate through the repository against a real MongoDB: the POJO codec with nested units, contacts and billing, every partial update (including the positional unit-status update), not-found handling, and the database taken from `mongodb.uri`.
 
 ## License
 

@@ -52,7 +52,7 @@ class OrganisationMongoRepositoryAdapterTest {
         when(mongoClient.getDatabase("thinklab_company_db")).thenReturn(mongoDatabase);
         when(mongoDatabase.getCollection("organisations", OrganisationDocument.class)).thenReturn(mongoCollection);
         when(mongoCollection.withCodecRegistry(any())).thenReturn(mongoCollection);
-        repositoryAdapter = new OrganisationMongoRepositoryAdapter(mongoClient);
+        repositoryAdapter = new OrganisationMongoRepositoryAdapter(mongoClient, "mongodb://localhost:27017/thinklab_company_db");
     }
 
     @Test
