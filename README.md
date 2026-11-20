@@ -99,13 +99,13 @@ kubectl apply -f k8s-deployment.yaml
 
 ### BIAN Behavior Qualifier Contract (`/party-reference-data-directory/v1`)
 
-All mutations require the `X-Executor` header. There is no `DELETE` — `control/cancel` replaces the previous physical deletion.
+`X-Tenant-Id` is mandatory on every route except `initiate`, and must be the id of the organisation itself (ADR-016): another organisation is a 404, and the collection `retrieve` lists only the caller's own. All mutations require the `X-Executor` header. There is no `DELETE` — `control/cancel` replaces the previous physical deletion.
 
 | Behavior Qualifier | Method & Path |
 |---|---|
 | initiate | `POST /party-reference-data-directory/v1/initiate` |
 | retrieve (single) | `GET /party-reference-data-directory/v1/{id}/retrieve` |
-| retrieve (collection) | `GET /party-reference-data-directory/v1/retrieve` |
+| retrieve (collection) | `GET /party-reference-data-directory/v1/retrieve` (the caller's own organisation: zero or one) |
 | update | `PUT /party-reference-data-directory/v1/{id}/update` |
 | control/activate, suspend, cancel | `PUT /party-reference-data-directory/v1/{id}/control/{action}` |
 | billing/update | `PUT /party-reference-data-directory/v1/{id}/billing/update` |

@@ -32,7 +32,7 @@ class RetrieveOrganisationUseCaseTest {
         Organisation organisation = Organisation.createNew(id, "Alpha Corp", "Alpha", "11.222.333/0001-44", null);
         when(organisationRepository.findById(id)).thenReturn(Mono.just(organisation));
 
-        StepVerifier.create(retrieveOrganisationUseCase.execute(id))
+        StepVerifier.create(retrieveOrganisationUseCase.execute(id, id))
                 .expectNextMatches(found -> found.id().equals(id) && found.corporateName().equals("Alpha Corp"))
                 .verifyComplete();
 
@@ -45,7 +45,7 @@ class RetrieveOrganisationUseCaseTest {
         UUID id = UUID.randomUUID();
         when(organisationRepository.findById(id)).thenReturn(Mono.empty());
 
-        StepVerifier.create(retrieveOrganisationUseCase.execute(id))
+        StepVerifier.create(retrieveOrganisationUseCase.execute(id, id))
                 .expectError(OrganisationNotFoundException.class)
                 .verify();
 

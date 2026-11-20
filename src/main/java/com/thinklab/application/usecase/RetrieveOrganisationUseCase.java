@@ -25,10 +25,10 @@ public class RetrieveOrganisationUseCase {
         this.organisationRepository = organisationRepository;
     }
 
-    public Mono<OrganisationResponse> execute(UUID id) {
+    public Mono<OrganisationResponse> execute(UUID id, UUID tenantId) {
         log.info("[USE CASE] Fetching organisation with ID: {}", id);
 
-        return organisationRepository.findById(id)
+        return OrganisationScope.own(id, tenantId).then(Mono.defer(() -> organisationRepository.findById(id)))
                 .switchIfEmpty(Mono.error(new OrganisationNotFoundException(id)))
                 .map(OrganisationMapper::toResponse);
     }

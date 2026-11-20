@@ -23,14 +23,14 @@ public class UpdateOrganisationUseCase {
         this.organisationRepository = organisationRepository;
     }
 
-    public Mono<Void> execute(UUID id, UpdateOrganisationRequest request) {
+    public Mono<Void> execute(UUID id, UUID tenantId, UpdateOrganisationRequest request) {
         log.info("[USE CASE] Updating organisation basic info for ID: {}", id);
 
-        return organisationRepository.updateBasicInfo(
+        return OrganisationScope.own(id, tenantId).then(Mono.defer(() -> organisationRepository.updateBasicInfo(
                 id,
                 request.corporateName(),
                 request.tradeName(),
                 request.taxIdentifier()
-        );
+        )));
     }
 }

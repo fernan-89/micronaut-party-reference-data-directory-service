@@ -28,10 +28,11 @@ public class InitiateOrganisationUnitUseCase {
         this.organisationRepository = organisationRepository;
     }
 
-    public Mono<Void> execute(UUID organisationId, InitiateOrganisationUnitRequest request) {
+    public Mono<Void> execute(UUID organisationId, UUID tenantId, InitiateOrganisationUnitRequest request) {
         log.info("[USE CASE] Adding organisation unit '{}' to organisation ID: {}", request.unitName(), organisationId);
 
-        return hashServicePort.generateSovereignId("organisation-unit-creation")
+        return OrganisationScope.own(organisationId, tenantId)
+                .then(Mono.defer(() -> hashServicePort.generateSovereignId("organisation-unit-creation")))
                 .map(unitId -> OrganisationMapper.toOrganisationUnit(request, unitId))
                 .flatMap(unit -> organisationRepository.addOrganisationUnit(organisationId, unit));
     }

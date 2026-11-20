@@ -135,15 +135,4 @@ class OrganisationPersistenceIT implements TestPropertyProvider {
         assertThrows(OrganisationNotFoundException.class,
                 () -> organisations.updateOrganisationUnitStatus(id, UUID.randomUUID(), OrganisationUnitStatus.SUSPENDED).block());
     }
-
-    @Test
-    @DisplayName("findAll returns every stored organisation")
-    void findAll() {
-        UUID first = organisations.create(newOrganisation()).block().getId();
-        UUID second = organisations.create(newOrganisation()).block().getId();
-
-        List<UUID> ids = organisations.findAll().map(Organisation::getId).collectList().block();
-
-        assertTrue(ids.containsAll(List.of(first, second)));
-    }
 }

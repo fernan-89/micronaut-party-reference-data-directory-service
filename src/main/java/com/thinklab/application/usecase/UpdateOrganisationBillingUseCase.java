@@ -24,9 +24,10 @@ public class UpdateOrganisationBillingUseCase {
         this.organisationRepository = organisationRepository;
     }
 
-    public Mono<Void> execute(UUID id, UpdateOrganisationBillingRequest request) {
+    public Mono<Void> execute(UUID id, UUID tenantId, UpdateOrganisationBillingRequest request) {
         log.info("[USE CASE] Updating billing info for ID: {}", id);
 
-        return organisationRepository.updateBilling(id, OrganisationMapper.toBilling(request));
+        return OrganisationScope.own(id, tenantId)
+                .then(Mono.defer(() -> organisationRepository.updateBilling(id, OrganisationMapper.toBilling(request))));
     }
 }

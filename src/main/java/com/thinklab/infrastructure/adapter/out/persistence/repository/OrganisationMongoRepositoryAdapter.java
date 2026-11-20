@@ -100,14 +100,6 @@ public class OrganisationMongoRepositoryAdapter implements OrganisationRepositor
     }
 
     @Override
-    public Flux<Organisation> findAll() {
-        log.debug("[PERSISTENCE] Fetching all Organisation Aggregates");
-
-        return Flux.from(getCollection().find())
-                .map(OrganisationPersistenceMapper::toDomain);
-    }
-
-    @Override
     public Mono<Void> updateBasicInfo(UUID id, String corporateName, String tradeName, String taxIdentifier) {
         log.debug("[PERSISTENCE] Partial Mutation: updateBasicInfo for ID: {}", id);
 

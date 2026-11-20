@@ -28,10 +28,11 @@ public class CaptureOrganisationContactUseCase {
         this.organisationRepository = organisationRepository;
     }
 
-    public Mono<Void> execute(UUID organisationId, CaptureOrganisationContactRequest request) {
+    public Mono<Void> execute(UUID organisationId, UUID tenantId, CaptureOrganisationContactRequest request) {
         log.info("[USE CASE] Adding contact '{}' to organisation ID: {}", request.fullName(), organisationId);
 
-        return hashServicePort.generateSovereignId("contact-creation")
+        return OrganisationScope.own(organisationId, tenantId)
+                .then(Mono.defer(() -> hashServicePort.generateSovereignId("contact-creation")))
                 .map(contactId -> OrganisationMapper.toContact(request, contactId))
                 .flatMap(contact -> organisationRepository.addContact(organisationId, contact));
     }

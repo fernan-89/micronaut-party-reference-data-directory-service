@@ -96,9 +96,9 @@ class OrganisationControllerTest {
 
     @Test
     void testRetrieveById() {
-        when(retrieveOrganisationUseCase.execute(organisationId)).thenReturn(Mono.just(sampleResponse));
+        when(retrieveOrganisationUseCase.execute(organisationId, organisationId)).thenReturn(Mono.just(sampleResponse));
 
-        StepVerifier.create(organisationController.retrieveById(organisationId))
+        StepVerifier.create(organisationController.retrieveById(organisationId, organisationId.toString()))
                 .assertNext(response -> {
                     assertEquals(HttpStatus.OK, response.getStatus());
                     assertNotNull(response.body());
@@ -109,9 +109,9 @@ class OrganisationControllerTest {
 
     @Test
     void testRetrieveAll() {
-        when(retrieveOrganisationsUseCase.execute()).thenReturn(Flux.just(sampleResponse));
+        when(retrieveOrganisationsUseCase.execute(organisationId)).thenReturn(Flux.just(sampleResponse));
 
-        StepVerifier.create(organisationController.retrieveAll())
+        StepVerifier.create(organisationController.retrieveAll(organisationId.toString()))
                 .assertNext(res -> assertEquals("Acme Corp", res.corporateName()))
                 .verifyComplete();
     }
@@ -119,36 +119,36 @@ class OrganisationControllerTest {
     @Test
     void testUpdate() {
         UpdateOrganisationRequest request = new UpdateOrganisationRequest("Acme Corp New", "Acme New", "12345678000199");
-        when(updateOrganisationUseCase.execute(eq(organisationId), any(UpdateOrganisationRequest.class))).thenReturn(Mono.empty());
+        when(updateOrganisationUseCase.execute(eq(organisationId), eq(organisationId), any(UpdateOrganisationRequest.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.update(organisationId, EXECUTOR, request))
+        StepVerifier.create(organisationController.update(organisationId, organisationId.toString(), EXECUTOR, request))
                 .assertNext(response -> assertEquals(HttpStatus.NO_CONTENT, response.getStatus()))
                 .verifyComplete();
     }
 
     @Test
     void testControlActivate() {
-        when(controlOrganisationUseCase.execute(organisationId, ControlOrganisationUseCase.Action.ACTIVATE)).thenReturn(Mono.empty());
+        when(controlOrganisationUseCase.execute(organisationId, organisationId, ControlOrganisationUseCase.Action.ACTIVATE)).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.controlActivate(organisationId, EXECUTOR))
+        StepVerifier.create(organisationController.controlActivate(organisationId, organisationId.toString(), EXECUTOR))
                 .assertNext(response -> assertEquals(HttpStatus.NO_CONTENT, response.getStatus()))
                 .verifyComplete();
     }
 
     @Test
     void testControlSuspend() {
-        when(controlOrganisationUseCase.execute(organisationId, ControlOrganisationUseCase.Action.SUSPEND)).thenReturn(Mono.empty());
+        when(controlOrganisationUseCase.execute(organisationId, organisationId, ControlOrganisationUseCase.Action.SUSPEND)).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.controlSuspend(organisationId, EXECUTOR))
+        StepVerifier.create(organisationController.controlSuspend(organisationId, organisationId.toString(), EXECUTOR))
                 .assertNext(response -> assertEquals(HttpStatus.NO_CONTENT, response.getStatus()))
                 .verifyComplete();
     }
 
     @Test
     void testControlCancelReplacesDelete() {
-        when(controlOrganisationUseCase.execute(organisationId, ControlOrganisationUseCase.Action.CANCEL)).thenReturn(Mono.empty());
+        when(controlOrganisationUseCase.execute(organisationId, organisationId, ControlOrganisationUseCase.Action.CANCEL)).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.controlCancel(organisationId, EXECUTOR))
+        StepVerifier.create(organisationController.controlCancel(organisationId, organisationId.toString(), EXECUTOR))
                 .assertNext(response -> assertEquals(HttpStatus.NO_CONTENT, response.getStatus()))
                 .verifyComplete();
     }
@@ -156,9 +156,9 @@ class OrganisationControllerTest {
     @Test
     void testUpdateBilling() {
         UpdateOrganisationBillingRequest request = new UpdateOrganisationBillingRequest("new@acme.com", "BRL", "LUCRO_REAL");
-        when(updateOrganisationBillingUseCase.execute(eq(organisationId), any(UpdateOrganisationBillingRequest.class))).thenReturn(Mono.empty());
+        when(updateOrganisationBillingUseCase.execute(eq(organisationId), eq(organisationId), any(UpdateOrganisationBillingRequest.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.updateBilling(organisationId, EXECUTOR, request))
+        StepVerifier.create(organisationController.updateBilling(organisationId, organisationId.toString(), EXECUTOR, request))
                 .assertNext(response -> assertEquals(HttpStatus.NO_CONTENT, response.getStatus()))
                 .verifyComplete();
     }
@@ -166,18 +166,18 @@ class OrganisationControllerTest {
     @Test
     void testInitiateOrganisationUnit() {
         InitiateOrganisationUnitRequest request = new InitiateOrganisationUnitRequest("Unit 1", "Main St 100", "City", "Country", "12345");
-        when(initiateOrganisationUnitUseCase.execute(eq(organisationId), any(InitiateOrganisationUnitRequest.class))).thenReturn(Mono.empty());
+        when(initiateOrganisationUnitUseCase.execute(eq(organisationId), eq(organisationId), any(InitiateOrganisationUnitRequest.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.initiateOrganisationUnit(organisationId, EXECUTOR, request))
+        StepVerifier.create(organisationController.initiateOrganisationUnit(organisationId, organisationId.toString(), EXECUTOR, request))
                 .assertNext(response -> assertEquals(HttpStatus.CREATED, response.getStatus()))
                 .verifyComplete();
     }
 
     @Test
     void testRetrieveOrganisationUnits() {
-        when(retrieveOrganisationUseCase.execute(organisationId)).thenReturn(Mono.just(sampleResponse));
+        when(retrieveOrganisationUseCase.execute(organisationId, organisationId)).thenReturn(Mono.just(sampleResponse));
 
-        StepVerifier.create(organisationController.retrieveOrganisationUnits(organisationId))
+        StepVerifier.create(organisationController.retrieveOrganisationUnits(organisationId, organisationId.toString()))
                 .assertNext(response -> {
                     assertEquals(HttpStatus.OK, response.getStatus());
                     assertEquals(0, response.body().size());
@@ -187,9 +187,9 @@ class OrganisationControllerTest {
 
     @Test
     void testRetrieveOrganisationUnitByIdNotFound() {
-        when(retrieveOrganisationUseCase.execute(organisationId)).thenReturn(Mono.just(sampleResponse));
+        when(retrieveOrganisationUseCase.execute(organisationId, organisationId)).thenReturn(Mono.just(sampleResponse));
 
-        StepVerifier.create(organisationController.retrieveOrganisationUnitById(organisationId, UUID.randomUUID()))
+        StepVerifier.create(organisationController.retrieveOrganisationUnitById(organisationId, organisationId.toString(), UUID.randomUUID()))
                 .expectError(com.thinklab.domain.exception.OrganisationNotFoundException.class)
                 .verify();
     }
@@ -197,9 +197,9 @@ class OrganisationControllerTest {
     @Test
     void testControlOrganisationUnitSuspend() {
         UUID unitId = UUID.randomUUID();
-        when(controlOrganisationUnitUseCase.execute(organisationId, unitId, OrganisationUnitStatus.SUSPENDED)).thenReturn(Mono.empty());
+        when(controlOrganisationUnitUseCase.execute(organisationId, organisationId, unitId, OrganisationUnitStatus.SUSPENDED)).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.controlOrganisationUnitSuspend(organisationId, unitId, EXECUTOR))
+        StepVerifier.create(organisationController.controlOrganisationUnitSuspend(organisationId, organisationId.toString(), unitId, EXECUTOR))
                 .assertNext(response -> assertEquals(HttpStatus.NO_CONTENT, response.getStatus()))
                 .verifyComplete();
     }
@@ -207,9 +207,9 @@ class OrganisationControllerTest {
     @Test
     void testControlOrganisationUnitReactivate() {
         UUID unitId = UUID.randomUUID();
-        when(controlOrganisationUnitUseCase.execute(organisationId, unitId, OrganisationUnitStatus.ACTIVE)).thenReturn(Mono.empty());
+        when(controlOrganisationUnitUseCase.execute(organisationId, organisationId, unitId, OrganisationUnitStatus.ACTIVE)).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.controlOrganisationUnitReactivate(organisationId, unitId, EXECUTOR))
+        StepVerifier.create(organisationController.controlOrganisationUnitReactivate(organisationId, organisationId.toString(), unitId, EXECUTOR))
                 .assertNext(response -> assertEquals(HttpStatus.NO_CONTENT, response.getStatus()))
                 .verifyComplete();
     }
@@ -217,18 +217,18 @@ class OrganisationControllerTest {
     @Test
     void testInitiateContact() {
         CaptureOrganisationContactRequest request = new CaptureOrganisationContactRequest("John Doe", "john@acme.com", "+123456789", ContactRole.ADMIN);
-        when(captureOrganisationContactUseCase.execute(eq(organisationId), any(CaptureOrganisationContactRequest.class))).thenReturn(Mono.empty());
+        when(captureOrganisationContactUseCase.execute(eq(organisationId), eq(organisationId), any(CaptureOrganisationContactRequest.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(organisationController.initiateContact(organisationId, EXECUTOR, request))
+        StepVerifier.create(organisationController.initiateContact(organisationId, organisationId.toString(), EXECUTOR, request))
                 .assertNext(response -> assertEquals(HttpStatus.CREATED, response.getStatus()))
                 .verifyComplete();
     }
 
     @Test
     void testRetrieveContacts() {
-        when(retrieveOrganisationUseCase.execute(organisationId)).thenReturn(Mono.just(sampleResponse));
+        when(retrieveOrganisationUseCase.execute(organisationId, organisationId)).thenReturn(Mono.just(sampleResponse));
 
-        StepVerifier.create(organisationController.retrieveContacts(organisationId))
+        StepVerifier.create(organisationController.retrieveContacts(organisationId, organisationId.toString()))
                 .assertNext(response -> {
                     assertEquals(HttpStatus.OK, response.getStatus());
                     assertEquals(0, response.body().size());
@@ -242,9 +242,9 @@ class OrganisationControllerTest {
         OrganisationResponse.OrganisationUnitResponse unit = new OrganisationResponse.OrganisationUnitResponse(unitId, "HQ", "a", "c", "BR", "z", "ACTIVE");
         OrganisationResponse withUnit = new OrganisationResponse(organisationId, "Acme Corp", "Acme", "12345678000199", "ACTIVE", null,
                 java.util.List.of(unit), Collections.emptyList(), Instant.now(), Instant.now());
-        when(retrieveOrganisationUseCase.execute(organisationId)).thenReturn(Mono.just(withUnit));
+        when(retrieveOrganisationUseCase.execute(organisationId, organisationId)).thenReturn(Mono.just(withUnit));
 
-        StepVerifier.create(organisationController.retrieveOrganisationUnitById(organisationId, unitId))
+        StepVerifier.create(organisationController.retrieveOrganisationUnitById(organisationId, organisationId.toString(), unitId))
                 .assertNext(r -> org.junit.jupiter.api.Assertions.assertEquals(unitId, r.body().unitId()))
                 .verifyComplete();
     }

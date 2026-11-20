@@ -8,8 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
+import java.util.UUID;
+
 /**
- * Use Case to retrieve all Organisations reactively (BIAN Behavior Qualifier: {@code retrieve}, collection).
+ * Use Case to retrieve the caller's own Organisation as a collection of zero or one (ADR-016) (BIAN Behavior Qualifier: {@code retrieve}, collection).
  */
 @Singleton
 public class RetrieveOrganisationsUseCase {
@@ -22,10 +24,11 @@ public class RetrieveOrganisationsUseCase {
         this.organisationRepository = organisationRepository;
     }
 
-    public Flux<OrganisationResponse> execute() {
-        log.info("[USE CASE] Fetching all organisations");
+    public Flux<OrganisationResponse> execute(UUID tenantId) {
+        log.info("[USE CASE] Fetching the organisation of tenant {}", tenantId);
 
-        return organisationRepository.findAll()
-                .map(OrganisationMapper::toResponse);
+        return organisationRepository.findById(tenantId)
+                .map(OrganisationMapper::toResponse)
+                .flux();
     }
 }

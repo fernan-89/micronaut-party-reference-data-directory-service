@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.UUID;
@@ -25,18 +25,17 @@ class RetrieveOrganisationsUseCaseTest {
     private RetrieveOrganisationsUseCase retrieveOrganisationsUseCase;
 
     @Test
-    @DisplayName("Should return a Flux of all organisation aggregates projected as responses")
+    @DisplayName("Should return a Flux of the caller's own organisation projected as a response")
     void testRetrieveOrganisationsSuccess() {
-        Organisation o1 = Organisation.createNew(UUID.randomUUID(), "Organisation A", "A", "11.111.111/0001-11", null);
-        Organisation o2 = Organisation.createNew(UUID.randomUUID(), "Organisation B", "B", "22.222.222/0001-22", null);
+        UUID tenant = UUID.randomUUID();
+        Organisation own = Organisation.createNew(tenant, "Organisation A", "A", "11.111.111/0001-11", null);
 
-        when(organisationRepository.findAll()).thenReturn(Flux.just(o1, o2));
+        when(organisationRepository.findById(tenant)).thenReturn(Mono.just(own));
 
-        StepVerifier.create(retrieveOrganisationsUseCase.execute())
+        StepVerifier.create(retrieveOrganisationsUseCase.execute(tenant))
                 .expectNextMatches(res -> res.corporateName().equals("Organisation A"))
-                .expectNextMatches(res -> res.corporateName().equals("Organisation B"))
                 .verifyComplete();
 
-        verify(organisationRepository, times(1)).findAll();
+        verify(organisationRepository, times(1)).findById(tenant);
     }
 }
