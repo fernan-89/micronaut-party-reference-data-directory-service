@@ -55,6 +55,7 @@ public class OrganisationController {
 
     private static final Logger log = LoggerFactory.getLogger(OrganisationController.class);
     private static final String EXECUTOR_HEADER = "X-Executor";
+    static final String TENANT_HEADER = "X-Tenant-Id";
 
     private final InitiateOrganisationUseCase initiateOrganisationUseCase;
     private final RetrieveOrganisationUseCase retrieveOrganisationUseCase;
@@ -102,102 +103,102 @@ public class OrganisationController {
 
     /** Behavior Qualifier: {@code retrieve}. Fetches a single Organisation by UUID. */
     @Get("/{id}/retrieve")
-    public Mono<HttpResponse<OrganisationResponse>> retrieveById(@PathVariable UUID id) {
+    public Mono<HttpResponse<OrganisationResponse>> retrieveById(@PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId) {
         log.info("[ACTION: RETRIEVE_ORGANISATION] Received request to get organisation by ID: {}", id);
 
-        return retrieveOrganisationUseCase.execute(id)
+        return retrieveOrganisationUseCase.execute(id, UUID.fromString(tenantId))
                 .map(HttpResponse::ok);
     }
 
-    /** Behavior Qualifier: {@code retrieve} (collection). Lists all Organisations. */
+    /** Behavior Qualifier: {@code retrieve} (collection). Lists the caller's own Organisation (a list of zero or one, ADR-016). */
     @Get("/retrieve")
-    public Flux<OrganisationResponse> retrieveAll() {
+    public Flux<OrganisationResponse> retrieveAll(@Header(TENANT_HEADER) @NotBlank String tenantId) {
         log.info("[ACTION: RETRIEVE_ORGANISATIONS] Received request to list all organisations");
 
-        return retrieveOrganisationsUseCase.execute();
+        return Flux.defer(() -> retrieveOrganisationsUseCase.execute(UUID.fromString(tenantId)));
     }
 
     /** Behavior Qualifier: {@code update}. Updates basic Organisation info. */
     @Put("/{id}/update")
     public Mono<HttpResponse<Void>> update(
-            @PathVariable UUID id,
+            @PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId,
             @Header(EXECUTOR_HEADER) @NotBlank String executor,
             @Body @Valid UpdateOrganisationRequest request
     ) {
         log.info("[ACTION: UPDATE_ORGANISATION] [EXECUTOR: {}] Received request to update organisation info for ID: {}", executor, id);
 
-        return updateOrganisationUseCase.execute(id, request)
+        return updateOrganisationUseCase.execute(id, UUID.fromString(tenantId), request)
                 .thenReturn(HttpResponse.noContent());
     }
 
     /** Behavior Qualifier: {@code control/activate}. */
     @Put("/{id}/control/activate")
-    public Mono<HttpResponse<Void>> controlActivate(@PathVariable UUID id, @Header(EXECUTOR_HEADER) @NotBlank String executor) {
+    public Mono<HttpResponse<Void>> controlActivate(@PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId, @Header(EXECUTOR_HEADER) @NotBlank String executor) {
         log.info("[ACTION: CONTROL_ORGANISATION] [EXECUTOR: {}] activate for ID: {}", executor, id);
 
-        return controlOrganisationUseCase.execute(id, ControlOrganisationUseCase.Action.ACTIVATE)
+        return controlOrganisationUseCase.execute(id, UUID.fromString(tenantId), ControlOrganisationUseCase.Action.ACTIVATE)
                 .thenReturn(HttpResponse.noContent());
     }
 
     /** Behavior Qualifier: {@code control/suspend}. */
     @Put("/{id}/control/suspend")
-    public Mono<HttpResponse<Void>> controlSuspend(@PathVariable UUID id, @Header(EXECUTOR_HEADER) @NotBlank String executor) {
+    public Mono<HttpResponse<Void>> controlSuspend(@PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId, @Header(EXECUTOR_HEADER) @NotBlank String executor) {
         log.info("[ACTION: CONTROL_ORGANISATION] [EXECUTOR: {}] suspend for ID: {}", executor, id);
 
-        return controlOrganisationUseCase.execute(id, ControlOrganisationUseCase.Action.SUSPEND)
+        return controlOrganisationUseCase.execute(id, UUID.fromString(tenantId), ControlOrganisationUseCase.Action.SUSPEND)
                 .thenReturn(HttpResponse.noContent());
     }
 
     /** Behavior Qualifier: {@code control/cancel}. Terminal, soft — replaces the former physical DELETE. */
     @Put("/{id}/control/cancel")
-    public Mono<HttpResponse<Void>> controlCancel(@PathVariable UUID id, @Header(EXECUTOR_HEADER) @NotBlank String executor) {
+    public Mono<HttpResponse<Void>> controlCancel(@PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId, @Header(EXECUTOR_HEADER) @NotBlank String executor) {
         log.info("[ACTION: CONTROL_ORGANISATION] [EXECUTOR: {}] cancel for ID: {}", executor, id);
 
-        return controlOrganisationUseCase.execute(id, ControlOrganisationUseCase.Action.CANCEL)
+        return controlOrganisationUseCase.execute(id, UUID.fromString(tenantId), ControlOrganisationUseCase.Action.CANCEL)
                 .thenReturn(HttpResponse.noContent());
     }
 
     /** Behavior Qualifier: {@code billing/update}. */
     @Put("/{id}/billing/update")
     public Mono<HttpResponse<Void>> updateBilling(
-            @PathVariable UUID id,
+            @PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId,
             @Header(EXECUTOR_HEADER) @NotBlank String executor,
             @Body @Valid UpdateOrganisationBillingRequest request
     ) {
         log.info("[ACTION: UPDATE_ORGANISATION_BILLING] [EXECUTOR: {}] Received request to update billing for ID: {}", executor, id);
 
-        return updateOrganisationBillingUseCase.execute(id, request)
+        return updateOrganisationBillingUseCase.execute(id, UUID.fromString(tenantId), request)
                 .thenReturn(HttpResponse.noContent());
     }
 
     /** Behavior Qualifier: {@code organisation-unit/initiate}. */
     @Post("/{id}/organisation-unit/initiate")
     public Mono<HttpResponse<Void>> initiateOrganisationUnit(
-            @PathVariable UUID id,
+            @PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId,
             @Header(EXECUTOR_HEADER) @NotBlank String executor,
             @Body @Valid InitiateOrganisationUnitRequest request
     ) {
         log.info("[ACTION: INITIATE_ORGANISATION_UNIT] [EXECUTOR: {}] Received request to add organisation unit for ID: {}", executor, id);
 
-        return initiateOrganisationUnitUseCase.execute(id, request)
+        return initiateOrganisationUnitUseCase.execute(id, UUID.fromString(tenantId), request)
                 .thenReturn(HttpResponse.status(HttpStatus.CREATED));
     }
 
     /** Behavior Qualifier: {@code organisation-unit/retrieve} (collection). Lists all units of an Organisation. */
     @Get("/{id}/organisation-unit/retrieve")
-    public Mono<HttpResponse<List<OrganisationUnitResponse>>> retrieveOrganisationUnits(@PathVariable UUID id) {
+    public Mono<HttpResponse<List<OrganisationUnitResponse>>> retrieveOrganisationUnits(@PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId) {
         log.info("[ACTION: RETRIEVE_ORGANISATION_UNITS] Received request to list organisation units for ID: {}", id);
 
-        return retrieveOrganisationUseCase.execute(id)
+        return retrieveOrganisationUseCase.execute(id, UUID.fromString(tenantId))
                 .map(response -> HttpResponse.ok(response.organisationUnits()));
     }
 
     /** Behavior Qualifier: {@code organisation-unit/{unitId}/retrieve}. */
     @Get("/{id}/organisation-unit/{unitId}/retrieve")
-    public Mono<HttpResponse<OrganisationUnitResponse>> retrieveOrganisationUnitById(@PathVariable UUID id, @PathVariable UUID unitId) {
+    public Mono<HttpResponse<OrganisationUnitResponse>> retrieveOrganisationUnitById(@PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId, @PathVariable UUID unitId) {
         log.info("[ACTION: RETRIEVE_ORGANISATION_UNIT] Received request to get organisation unit {} for organisation ID: {}", unitId, id);
 
-        return retrieveOrganisationUseCase.execute(id)
+        return retrieveOrganisationUseCase.execute(id, UUID.fromString(tenantId))
                 .flatMap(response -> response.organisationUnits().stream()
                         .filter(u -> u.unitId().equals(unitId))
                         .findFirst()
@@ -209,44 +210,44 @@ public class OrganisationController {
     /** Behavior Qualifier: {@code organisation-unit/control/suspend}. */
     @Put("/{id}/organisation-unit/{unitId}/control/suspend")
     public Mono<HttpResponse<Void>> controlOrganisationUnitSuspend(
-            @PathVariable UUID id, @PathVariable UUID unitId, @Header(EXECUTOR_HEADER) @NotBlank String executor
+            @PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId, @PathVariable UUID unitId, @Header(EXECUTOR_HEADER) @NotBlank String executor
     ) {
         log.info("[ACTION: CONTROL_ORGANISATION_UNIT] [EXECUTOR: {}] suspend for organisation {} / unit {}", executor, id, unitId);
 
-        return controlOrganisationUnitUseCase.execute(id, unitId, OrganisationUnitStatus.SUSPENDED)
+        return controlOrganisationUnitUseCase.execute(id, UUID.fromString(tenantId), unitId, OrganisationUnitStatus.SUSPENDED)
                 .thenReturn(HttpResponse.noContent());
     }
 
     /** Behavior Qualifier: {@code organisation-unit/control/reactivate}. */
     @Put("/{id}/organisation-unit/{unitId}/control/reactivate")
     public Mono<HttpResponse<Void>> controlOrganisationUnitReactivate(
-            @PathVariable UUID id, @PathVariable UUID unitId, @Header(EXECUTOR_HEADER) @NotBlank String executor
+            @PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId, @PathVariable UUID unitId, @Header(EXECUTOR_HEADER) @NotBlank String executor
     ) {
         log.info("[ACTION: CONTROL_ORGANISATION_UNIT] [EXECUTOR: {}] reactivate for organisation {} / unit {}", executor, id, unitId);
 
-        return controlOrganisationUnitUseCase.execute(id, unitId, OrganisationUnitStatus.ACTIVE)
+        return controlOrganisationUnitUseCase.execute(id, UUID.fromString(tenantId), unitId, OrganisationUnitStatus.ACTIVE)
                 .thenReturn(HttpResponse.noContent());
     }
 
     /** Behavior Qualifier: {@code contact/initiate}. */
     @Post("/{id}/contact/initiate")
     public Mono<HttpResponse<Void>> initiateContact(
-            @PathVariable UUID id,
+            @PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId,
             @Header(EXECUTOR_HEADER) @NotBlank String executor,
             @Body @Valid CaptureOrganisationContactRequest request
     ) {
         log.info("[ACTION: CAPTURE_ORGANISATION_CONTACT] [EXECUTOR: {}] Received request to add contact for ID: {}", executor, id);
 
-        return captureOrganisationContactUseCase.execute(id, request)
+        return captureOrganisationContactUseCase.execute(id, UUID.fromString(tenantId), request)
                 .thenReturn(HttpResponse.status(HttpStatus.CREATED));
     }
 
     /** Behavior Qualifier: {@code contact/retrieve} (collection). Lists all contacts of an Organisation. */
     @Get("/{id}/contact/retrieve")
-    public Mono<HttpResponse<List<OrganisationResponse.ContactResponse>>> retrieveContacts(@PathVariable UUID id) {
+    public Mono<HttpResponse<List<OrganisationResponse.ContactResponse>>> retrieveContacts(@PathVariable UUID id, @Header(TENANT_HEADER) @NotBlank String tenantId) {
         log.info("[ACTION: RETRIEVE_ORGANISATION_CONTACTS] Received request to list contacts for ID: {}", id);
 
-        return retrieveOrganisationUseCase.execute(id)
+        return retrieveOrganisationUseCase.execute(id, UUID.fromString(tenantId))
                 .map(response -> HttpResponse.ok(response.contacts()));
     }
 }

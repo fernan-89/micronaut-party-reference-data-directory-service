@@ -302,7 +302,7 @@ class CoverageCompletionTest {
         when(repository.findById(ID)).thenReturn(Mono.just(org));
         when(repository.updateOrganisationUnitStatus(any(), any(), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(new ControlOrganisationUnitUseCase(repository).execute(ID, unitId, OrganisationUnitStatus.ACTIVE))
+        StepVerifier.create(new ControlOrganisationUnitUseCase(repository).execute(ID, ID, unitId, OrganisationUnitStatus.ACTIVE))
                 .verifyComplete();
 
         verify(repository).updateOrganisationUnitStatus(ID, unitId, OrganisationUnitStatus.ACTIVE);
@@ -314,7 +314,7 @@ class CoverageCompletionTest {
         OrganisationRepository repository = mock(OrganisationRepository.class);
         when(repository.findById(ID)).thenReturn(Mono.empty());
 
-        StepVerifier.create(new ControlOrganisationUnitUseCase(repository).execute(ID, UUID.randomUUID(), OrganisationUnitStatus.SUSPENDED))
+        StepVerifier.create(new ControlOrganisationUnitUseCase(repository).execute(ID, ID, UUID.randomUUID(), OrganisationUnitStatus.SUSPENDED))
                 .expectError(OrganisationNotFoundException.class).verify();
     }
 }

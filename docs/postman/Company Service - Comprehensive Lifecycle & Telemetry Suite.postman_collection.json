@@ -55,8 +55,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/health",
-              "host": ["{{base_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             }
           }
         },
@@ -80,8 +84,13 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/health/liveness",
-              "host": ["{{base_url}}"],
-              "path": ["health", "liveness"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "liveness"
+              ]
             }
           }
         },
@@ -105,8 +114,13 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/health/readiness",
-              "host": ["{{base_url}}"],
-              "path": ["health", "readiness"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "readiness"
+              ]
             }
           }
         },
@@ -129,8 +143,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/prometheus",
-              "host": ["{{base_url}}"],
-              "path": ["prometheus"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "prometheus"
+              ]
             }
           }
         },
@@ -153,8 +171,13 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/swagger-ui/index.html",
-              "host": ["{{base_url}}"],
-              "path": ["swagger-ui", "index.html"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "swagger-ui",
+                "index.html"
+              ]
             }
           }
         }
@@ -186,8 +209,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -195,8 +224,14 @@
             },
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/initiate",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "initiate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "initiate"
+              ]
             }
           }
         },
@@ -219,11 +254,23 @@
           ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/retrieve",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "retrieve"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "retrieve"
+              ]
             }
           }
         },
@@ -243,8 +290,18 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -252,8 +309,15 @@
             },
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/update",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "update"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "update"
+              ]
             }
           }
         },
@@ -273,12 +337,27 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/activate",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "control", "activate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "control",
+                "activate"
+              ]
             }
           }
         },
@@ -298,8 +377,18 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -307,8 +396,16 @@
             },
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/billing/update",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "billing", "update"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "billing",
+                "update"
+              ]
             }
           }
         },
@@ -328,8 +425,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -337,8 +444,16 @@
             },
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/initiate",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "initiate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "organisation-unit",
+                "initiate"
+              ]
             }
           }
         },
@@ -365,11 +480,24 @@
           ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/retrieve",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "retrieve"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "organisation-unit",
+                "retrieve"
+              ]
             }
           }
         },
@@ -390,11 +518,25 @@
           ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/{{organisationUnitId}}/retrieve",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "{{organisationUnitId}}", "retrieve"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "organisation-unit",
+                "{{organisationUnitId}}",
+                "retrieve"
+              ]
             }
           }
         },
@@ -414,12 +556,29 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/{{organisationUnitId}}/control/suspend",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "{{organisationUnitId}}", "control", "suspend"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "organisation-unit",
+                "{{organisationUnitId}}",
+                "control",
+                "suspend"
+              ]
             }
           }
         },
@@ -439,12 +598,29 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/organisation-unit/{{organisationUnitId}}/control/reactivate",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "organisation-unit", "{{organisationUnitId}}", "control", "reactivate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "organisation-unit",
+                "{{organisationUnitId}}",
+                "control",
+                "reactivate"
+              ]
             }
           }
         },
@@ -464,8 +640,18 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -473,8 +659,16 @@
             },
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/contact/initiate",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "contact", "initiate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "contact",
+                "initiate"
+              ]
             }
           }
         },
@@ -500,11 +694,24 @@
           ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/contact/retrieve",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "contact", "retrieve"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "contact",
+                "retrieve"
+              ]
             }
           }
         },
@@ -528,11 +735,22 @@
           ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/retrieve",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "retrieve"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "retrieve"
+              ]
             }
           }
         },
@@ -552,12 +770,27 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/suspend",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "control", "suspend"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "control",
+                "suspend"
+              ]
             }
           }
         },
@@ -577,12 +810,27 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/cancel",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "control", "cancel"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "control",
+                "cancel"
+              ]
             }
           }
         }
@@ -612,8 +860,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -621,8 +875,14 @@
             },
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/initiate",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "initiate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "initiate"
+              ]
             }
           }
         },
@@ -642,7 +902,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -650,8 +913,14 @@
             },
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/initiate",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "initiate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "initiate"
+              ]
             }
           }
         },
@@ -675,11 +944,23 @@
           ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/00000000-0000-0000-0000-000000000000/retrieve",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "00000000-0000-0000-0000-000000000000", "retrieve"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "00000000-0000-0000-0000-000000000000",
+                "retrieve"
+              ]
             }
           }
         },
@@ -701,12 +982,185 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "X-Executor", "value": "{{executor}}" }
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{organisationId}}"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/cancel",
-              "host": ["{{base_url}}"],
-              "path": ["party-reference-data-directory", "v1", "{{organisationId}}", "control", "cancel"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "control",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Tenant Isolation on the By-Id Routes",
+      "item": [
+        {
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set('otherOrganisationId', pm.variables.replaceIn('{{$guid}}'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 (another tenant\\'s object is the same as none)', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "90. Read it as another tenant (404)",
+          "request": {
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{otherOrganisationId}}"
+              },
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "retrieve"
+              ],
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/retrieve"
+            }
+          }
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 (another tenant\\'s object is the same as none)', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "92. Change it as another tenant (404)",
+          "request": {
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{otherOrganisationId}}"
+              },
+              {
+                "key": "X-Executor",
+                "value": "{{executor}}"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "control",
+                "cancel"
+              ],
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/control/cancel"
+            }
+          }
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Another tenant lists nothing: it never sees the organisation of someone else', () => pm.expect(pm.response.json()).to.eql([]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "93. List as another tenant (empty)",
+          "request": {
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{otherOrganisationId}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "retrieve"
+              ],
+              "raw": "{{base_url}}/party-reference-data-directory/v1/retrieve"
+            }
+          }
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400 (the tenant is required on every by-id route)', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "94. Read without X-Tenant-Id (400)",
+          "request": {
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "party-reference-data-directory",
+                "v1",
+                "{{organisationId}}",
+                "retrieve"
+              ],
+              "raw": "{{base_url}}/party-reference-data-directory/v1/{{organisationId}}/retrieve"
             }
           }
         }

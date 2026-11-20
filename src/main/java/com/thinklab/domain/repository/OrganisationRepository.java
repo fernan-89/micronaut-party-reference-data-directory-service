@@ -29,8 +29,6 @@ public interface OrganisationRepository {
 
     Mono<Organisation> findById(UUID id);
 
-    Flux<Organisation> findAll();
-
     Mono<Void> updateBasicInfo(UUID id, String corporateName, String tradeName, String taxIdentifier);
 
     Mono<Void> updateStatus(UUID id, OrganisationStatus status);

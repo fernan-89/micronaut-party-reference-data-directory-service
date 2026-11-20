@@ -31,10 +31,10 @@ public class ControlOrganisationUnitUseCase {
         this.organisationRepository = organisationRepository;
     }
 
-    public Mono<Void> execute(UUID organisationId, UUID unitId, OrganisationUnitStatus targetStatus) {
+    public Mono<Void> execute(UUID organisationId, UUID tenantId, UUID unitId, OrganisationUnitStatus targetStatus) {
         log.info("[USE CASE] Controlling organisation unit {} lifecycle: {} for organisation ID: {}", unitId, targetStatus, organisationId);
 
-        return organisationRepository.findById(organisationId)
+        return OrganisationScope.own(organisationId, tenantId).then(Mono.defer(() -> organisationRepository.findById(organisationId)))
                 .switchIfEmpty(Mono.error(new OrganisationNotFoundException(organisationId)))
                 .flatMap(organisation -> {
                     if (targetStatus == OrganisationUnitStatus.SUSPENDED) {

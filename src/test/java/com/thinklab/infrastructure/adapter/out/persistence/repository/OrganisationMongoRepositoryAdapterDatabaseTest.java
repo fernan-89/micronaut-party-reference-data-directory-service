@@ -7,7 +7,6 @@ import com.mongodb.reactivestreams.client.MongoDatabase;
 import com.thinklab.infrastructure.adapter.out.persistence.entity.OrganisationDocument;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,11 +26,8 @@ class OrganisationMongoRepositoryAdapterDatabaseTest {
         when(client.getDatabase(database)).thenReturn(mongoDatabase);
         when(mongoDatabase.getCollection("organisations", OrganisationDocument.class)).thenReturn(collection);
         when(collection.withCodecRegistry(any())).thenReturn(collection);
-        when(collection.find()).thenReturn(find);
-        org.mockito.Mockito.doAnswer(inv -> {
-            Flux.<OrganisationDocument>empty().subscribe(inv.<org.reactivestreams.Subscriber<OrganisationDocument>>getArgument(0));
-            return null;
-        }).when(find).subscribe(any());
+        when(collection.find(any(org.bson.conversions.Bson.class))).thenReturn(find);
+        when(find.first()).thenReturn(reactor.core.publisher.Mono.empty());
         return client;
     }
 
@@ -40,7 +36,7 @@ class OrganisationMongoRepositoryAdapterDatabaseTest {
     void usesTheConfiguredDatabase() {
         MongoClient client = clientServing("tenant_directory");
 
-        new OrganisationMongoRepositoryAdapter(client, "mongodb://mongo:27017/tenant_directory").findAll().collectList().block();
+        new OrganisationMongoRepositoryAdapter(client, "mongodb://mongo:27017/tenant_directory").findById(java.util.UUID.randomUUID()).block();
 
         verify(client).getDatabase("tenant_directory");
     }
@@ -50,7 +46,7 @@ class OrganisationMongoRepositoryAdapterDatabaseTest {
     void fallsBackToTheDefaultDatabase() {
         MongoClient client = clientServing(OrganisationMongoRepositoryAdapter.DEFAULT_DATABASE);
 
-        new OrganisationMongoRepositoryAdapter(client, "mongodb://mongo:27017").findAll().collectList().block();
+        new OrganisationMongoRepositoryAdapter(client, "mongodb://mongo:27017").findById(java.util.UUID.randomUUID()).block();
 
         verify(client).getDatabase(OrganisationMongoRepositoryAdapter.DEFAULT_DATABASE);
     }

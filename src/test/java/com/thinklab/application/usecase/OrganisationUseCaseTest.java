@@ -71,7 +71,7 @@ class OrganisationUseCaseTest {
         RetrieveOrganisationUseCase useCase = new RetrieveOrganisationUseCase(organisationRepository);
         when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
 
-        StepVerifier.create(useCase.execute(organisationId))
+        StepVerifier.create(useCase.execute(organisationId, organisationId))
                 .assertNext(res -> assertEquals("Acme Corp", res.corporateName()))
                 .verifyComplete();
     }
@@ -81,7 +81,7 @@ class OrganisationUseCaseTest {
         RetrieveOrganisationUseCase useCase = new RetrieveOrganisationUseCase(organisationRepository);
         when(organisationRepository.findById(organisationId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(organisationId))
+        StepVerifier.create(useCase.execute(organisationId, organisationId))
                 .expectError(OrganisationNotFoundException.class)
                 .verify();
     }
@@ -89,9 +89,9 @@ class OrganisationUseCaseTest {
     @Test
     void testRetrieveOrganisationsUseCase() {
         RetrieveOrganisationsUseCase useCase = new RetrieveOrganisationsUseCase(organisationRepository);
-        when(organisationRepository.findAll()).thenReturn(Flux.just(organisation));
+        when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
 
-        StepVerifier.create(useCase.execute())
+        StepVerifier.create(useCase.execute(organisationId))
                 .assertNext(res -> assertEquals("Acme Corp", res.corporateName()))
                 .verifyComplete();
     }
@@ -102,7 +102,7 @@ class OrganisationUseCaseTest {
         UpdateOrganisationRequest request = new UpdateOrganisationRequest("Acme New", "Trade", "12345678000199");
         when(organisationRepository.updateBasicInfo(organisationId, "Acme New", "Trade", "12345678000199")).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(organisationId, request))
+        StepVerifier.create(useCase.execute(organisationId, organisationId, request))
                 .verifyComplete();
     }
 
@@ -112,7 +112,7 @@ class OrganisationUseCaseTest {
         when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
         when(organisationRepository.updateStatus(organisationId, Organisation.OrganisationStatus.ACTIVE)).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(organisationId, ControlOrganisationUseCase.Action.ACTIVATE))
+        StepVerifier.create(useCase.execute(organisationId, organisationId, ControlOrganisationUseCase.Action.ACTIVATE))
                 .verifyComplete();
     }
 
@@ -122,7 +122,7 @@ class OrganisationUseCaseTest {
         when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
         when(organisationRepository.updateStatus(organisationId, Organisation.OrganisationStatus.CANCELED)).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(organisationId, ControlOrganisationUseCase.Action.CANCEL))
+        StepVerifier.create(useCase.execute(organisationId, organisationId, ControlOrganisationUseCase.Action.CANCEL))
                 .verifyComplete();
     }
 
@@ -132,7 +132,7 @@ class OrganisationUseCaseTest {
         organisation.changeStatus(Organisation.OrganisationStatus.CANCELED);
         when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
 
-        StepVerifier.create(useCase.execute(organisationId, ControlOrganisationUseCase.Action.CANCEL))
+        StepVerifier.create(useCase.execute(organisationId, organisationId, ControlOrganisationUseCase.Action.CANCEL))
                 .expectError(com.thinklab.domain.exception.InvalidOrganisationStatusException.class)
                 .verify();
     }
@@ -143,7 +143,7 @@ class OrganisationUseCaseTest {
         UpdateOrganisationBillingRequest request = new UpdateOrganisationBillingRequest("billing@acme.com", "USD", "LUCRO_REAL");
         when(organisationRepository.updateBilling(eq(organisationId), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(organisationId, request))
+        StepVerifier.create(useCase.execute(organisationId, organisationId, request))
                 .verifyComplete();
     }
 
@@ -156,7 +156,7 @@ class OrganisationUseCaseTest {
         when(hashServicePort.generateSovereignId("organisation-unit-creation")).thenReturn(Mono.just(unitId));
         when(organisationRepository.addOrganisationUnit(eq(organisationId), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(organisationId, request))
+        StepVerifier.create(useCase.execute(organisationId, organisationId, request))
                 .verifyComplete();
     }
 
@@ -170,7 +170,7 @@ class OrganisationUseCaseTest {
         when(organisationRepository.findById(organisationId)).thenReturn(Mono.just(organisation));
         when(organisationRepository.updateOrganisationUnitStatus(organisationId, unitId, OrganisationUnitStatus.SUSPENDED)).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(organisationId, unitId, OrganisationUnitStatus.SUSPENDED))
+        StepVerifier.create(useCase.execute(organisationId, organisationId, unitId, OrganisationUnitStatus.SUSPENDED))
                 .verifyComplete();
     }
 
@@ -183,7 +183,27 @@ class OrganisationUseCaseTest {
         when(hashServicePort.generateSovereignId("contact-creation")).thenReturn(Mono.just(contactId));
         when(organisationRepository.addContact(eq(organisationId), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(organisationId, request))
+        StepVerifier.create(useCase.execute(organisationId, organisationId, request))
                 .verifyComplete();
+    }
+
+    @Test
+    void anotherTenantsOrganisationIsTheSameAsNone() {
+        UUID other = UUID.randomUUID();
+        UUID unitId = UUID.randomUUID();
+        UpdateOrganisationRequest update = new UpdateOrganisationRequest("x", "x", "12345678000199");
+        UpdateOrganisationBillingRequest billing = new UpdateOrganisationBillingRequest("b@acme.com", "USD", "LUCRO_REAL");
+        InitiateOrganisationUnitRequest unit = new InitiateOrganisationUnitRequest("Unit 1", "Street", "City", "Country", "12345");
+        CaptureOrganisationContactRequest contact = new CaptureOrganisationContactRequest("John", "john@acme.com", "1234", ContactRole.ADMIN);
+
+        StepVerifier.create(new RetrieveOrganisationUseCase(organisationRepository).execute(organisationId, other)).expectError(OrganisationNotFoundException.class).verify();
+        StepVerifier.create(new UpdateOrganisationUseCase(organisationRepository).execute(organisationId, other, update)).expectError(OrganisationNotFoundException.class).verify();
+        StepVerifier.create(new ControlOrganisationUseCase(organisationRepository).execute(organisationId, other, ControlOrganisationUseCase.Action.CANCEL)).expectError(OrganisationNotFoundException.class).verify();
+        StepVerifier.create(new UpdateOrganisationBillingUseCase(organisationRepository).execute(organisationId, other, billing)).expectError(OrganisationNotFoundException.class).verify();
+        StepVerifier.create(new InitiateOrganisationUnitUseCase(hashServicePort, organisationRepository).execute(organisationId, other, unit)).expectError(OrganisationNotFoundException.class).verify();
+        StepVerifier.create(new ControlOrganisationUnitUseCase(organisationRepository).execute(organisationId, other, unitId, OrganisationUnitStatus.SUSPENDED)).expectError(OrganisationNotFoundException.class).verify();
+        StepVerifier.create(new CaptureOrganisationContactUseCase(hashServicePort, organisationRepository).execute(organisationId, other, contact)).expectError(OrganisationNotFoundException.class).verify();
+
+        org.mockito.Mockito.verifyNoInteractions(hashServicePort, organisationRepository);
     }
 }

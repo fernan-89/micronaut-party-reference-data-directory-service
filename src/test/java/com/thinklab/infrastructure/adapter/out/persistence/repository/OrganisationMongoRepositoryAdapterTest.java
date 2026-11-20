@@ -103,36 +103,6 @@ class OrganisationMongoRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Should successfully list all organisations")
-    void testFindAllSuccess() {
-        OrganisationDocument doc1 = new OrganisationDocument();
-        doc1.setId(UUID.randomUUID());
-        doc1.setCorporateName("Organisation 1");
-        doc1.setTradeName("Trade 1");
-        doc1.setTaxIdentifier("11.111.111/0001-11");
-        doc1.setStatus("ACTIVE");
-
-        OrganisationDocument doc2 = new OrganisationDocument();
-        doc2.setId(UUID.randomUUID());
-        doc2.setCorporateName("Organisation 2");
-        doc2.setTradeName("Trade 2");
-        doc2.setTaxIdentifier("22.222.222/0001-22");
-        doc2.setStatus("PENDING_ACTIVATION");
-
-        FindPublisher<OrganisationDocument> findPublisher = mock(FindPublisher.class);
-        when(mongoCollection.find()).thenReturn(findPublisher);
-        org.mockito.Mockito.doAnswer(invocation -> {
-            org.reactivestreams.Subscriber<OrganisationDocument> s = invocation.getArgument(0);
-            Flux.just(doc1, doc2).subscribe(s);
-            return null;
-        }).when(findPublisher).subscribe(any());
-
-        StepVerifier.create(repositoryAdapter.findAll())
-                .expectNextCount(2)
-                .verifyComplete();
-    }
-
-    @Test
     @DisplayName("Should update basic info atomically")
     void testUpdateBasicInfoSuccess() {
         UUID id = UUID.randomUUID();
